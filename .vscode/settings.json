@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "daemon.h": "c",
+        "freertos.h": "c",
+        "task.h": "c",
+        "cmsis_os.h": "c",
+        "task_rtos.h": "c",
+        "dji_motor.h": "c",
+        "general_def.h": "c",
+        "motor_control.h": "c",
+        "task_init.h": "c"
+    }
+}
