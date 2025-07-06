@@ -84,7 +84,6 @@ build
 *.elf
 *.hex
 *.h86
-*.lib
 *.obj
 *.o
 *.sbr
@@ -138,3 +137,5 @@ build
 .DS_Store         # macOS 系统文件
 Thumbs.db         # Windows 缩略图缓存
 compile_commands.json
+*.log
+.clangd
