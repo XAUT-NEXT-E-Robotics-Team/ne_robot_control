@@ -3,6 +3,7 @@
  * @author imgzw
  * @brief  用于创建和管理机器人相关的任务，不使用STM32CubeMX的FreeRTOS配置，
  *         而是手动创建任务，便于管理
+ * @attention 本头文件只能在robot.c中包含
  * @version 0.1
  * @date 2025-07-06
  * 
@@ -21,6 +22,7 @@
 #include "bsp_dwt.h"
 #include "dji_motor.h"
 #include "daemon.h"
+#include "robot_cmd.h"
 
 osThreadId daemonTaskHandle;
 

@@ -15,5 +15,7 @@
 void robot_init(void)
 {
     BSPInit();
+    RobotCmdInit();
     
+    LOGINFO("[robot] Robot Init Success");
 }
