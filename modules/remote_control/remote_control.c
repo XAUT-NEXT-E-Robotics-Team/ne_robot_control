@@ -75,7 +75,7 @@ static void RCLostCallback(void *id)
  * @param rc_usart_handle 使用的串口号
  * @return RC_ctrl_t* 
  */
-void FSI6RemoteControlInit(UART_HandleTypeDef *rc_usart_handle)
+FSI6Data_t *FSI6RemoteControlInit(UART_HandleTypeDef *rc_usart_handle)
 {
     USART_Init_Config_s conf;
     conf.module_callback = RemoteControlRxCallback;
@@ -93,5 +93,6 @@ void FSI6RemoteControlInit(UART_HandleTypeDef *rc_usart_handle)
     rc_daemon_instance = DaemonRegister(&daemon_conf);
 
     LOGERROR("[rc] remote control initialized"); // 输出初始化信息
+    return &fsi6Data;
 }
 
