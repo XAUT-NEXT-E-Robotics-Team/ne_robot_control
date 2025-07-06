@@ -1,0 +1,44 @@
+/**
+ * @file remote_control.h
+ * @author imgzw
+ * @brief  遥控器模块定义头文件
+ * @version 0.1
+ * @date 2025-07-06
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
+#ifndef REMOTE_CONTROL_H
+#define REMOTE_CONTROL_H
+
+#include <stdint.h>
+#include "main.h"
+#include "usart.h"
+
+
+
+
+
+
+#define RC_FRAME_NUM     25u
+
+//FSI6遥控的数据
+typedef struct 
+{ 
+    uint8_t FSI6Start;
+    int16_t R_CH1;     //前后
+    int16_t R_CH2;     //左右
+    int16_t L_CH3;     //前后
+    int16_t L_CH4;     //左右
+    int16_t SA_CH5;
+    int16_t SB_CH6;
+    int16_t SC_CH7;
+    int16_t SD_CH8;
+    int16_t V1_CH9;
+    int16_t V2_CH10;
+    uint8_t FSI6_Flag;
+    uint8_t FSI6_End;
+}FSI6Data_t;
+
+
+#endif 
