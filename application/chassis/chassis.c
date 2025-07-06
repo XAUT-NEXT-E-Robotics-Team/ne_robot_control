@@ -74,21 +74,16 @@ void ChassisInit()
     },
     .motor_type = M3508, //电机类型
   };
-    //  @todo: 当前还没有设置电机的正反转,仍然需要手动添加reference的正负号,需要电机module的支持,待修改.
 chassis_motor_config.can_init_config.tx_id = 1 ; //电机1的发送ID
-chassis_motor_config.controller_setting_init_config.motor_reverse_flag = MOTOR_DIRECTION_REVERSE; //电机1正转
 MOTOR1 = DJIMotorInit(&chassis_motor_config); //电机1实例化
 
 chassis_motor_config.can_init_config.tx_id = 2 ; //电机2的发送ID
-chassis_motor_config.controller_setting_init_config.motor_reverse_flag = MOTOR_DIRECTION_REVERSE; //电机1正转
 MOTOR2 = DJIMotorInit(&chassis_motor_config); //电机2实例化
 
 chassis_motor_config.can_init_config.tx_id = 3 ; //电机3的发送ID
-chassis_motor_config.controller_setting_init_config.motor_reverse_flag = MOTOR_DIRECTION_REVERSE; //电机1正转
 MOTOR3 = DJIMotorInit(&chassis_motor_config); //电机3实例化
 
 chassis_motor_config.can_init_config.tx_id = 4 ; //电机4的发送ID
-chassis_motor_config.controller_setting_init_config.motor_reverse_flag = MOTOR_DIRECTION_REVERSE; //电机1正转
 MOTOR4 = DJIMotorInit(&chassis_motor_config); //电机4实例化
 
 chassis_sub = SubRegister("chassis_cmd", sizeof(Chassis_Ctrl_Cmd_s));
@@ -96,18 +91,13 @@ chassis_pub = PubRegister("chassis_feed", sizeof(Chassis_Upload_Data_s));
 
 }
 
-
-
-
 /**
  * 
  * @brief 计算每个轮毂电机的输出,正运动学解算
- *        用宏进行预替换减小开销,运动解算具体过程参考教程
  */
 static void MecanumCalculate()
 {
    chassis_motor1_speed =  (chassis_vx-chassis_vw*R)*arm_cos_fp32(45) + (chassis_vy + chassis_vw*R)*arm_sin_fp32(45) ;  
-
    chassis_motor2_speed =  (chassis_vx-chassis_vw*R)*arm_cos_fp32(135) + (chassis_vy + chassis_vw*R)*arm_sin_fp32(135) ;     
    chassis_motor2_speed =  (chassis_vx-chassis_vw*R)*arm_cos_fp32(-135) + (chassis_vy + chassis_vw*R)*arm_sin_fp32(-135) ;  
    chassis_motor2_speed =  (chassis_vx-chassis_vw*R)*arm_cos_fp32(-45) + (chassis_vy + chassis_vw*R)*arm_sin_fp32(-45) ;  
