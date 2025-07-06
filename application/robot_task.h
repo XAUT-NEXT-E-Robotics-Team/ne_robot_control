@@ -11,7 +11,8 @@
  * 
  */
 
-#pragma once
+#ifndef _ROBOT_TASH_H
+#define _ROBOT_TASH_H
 
 #include "main.h"
 
@@ -23,6 +24,7 @@
 #include "dji_motor.h"
 #include "daemon.h"
 #include "robot_cmd.h"
+#include "bsp_init.h"
 
 osThreadId daemonTaskHandle;
 
@@ -57,5 +59,6 @@ __attribute__((noreturn)) void StartDaemonTask(void const *argument)
         osDelay(10);
     }  
 }
+#endif
 
 

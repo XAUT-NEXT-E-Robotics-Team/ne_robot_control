@@ -8,20 +8,12 @@
  * @copyright Copyright (c) 2025
  * 
  */
-#ifndef REMOTE_CONTROL_H
-#define REMOTE_CONTROL_H
+#ifndef _REMOTE_CONTROL_H
+#define _REMOTE_CONTROL_H
 
 #include <stdint.h>
 #include "main.h"
 #include "usart.h"
-
-
-
-
-
-
-
-#define RC_FRAME_NUM     25u
 
 //FSI6遥控的数据
 typedef struct 

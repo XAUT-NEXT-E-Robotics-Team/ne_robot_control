@@ -75,7 +75,6 @@ void USARTSend(USARTInstance *_instance, uint8_t *send_buf, uint16_t send_size, 
     default:
         while (1)
             ; // illegal mode! check your code context! 检查定义instance的代码上下文,可能出现指针越界
-        break;
     }
 }
 
