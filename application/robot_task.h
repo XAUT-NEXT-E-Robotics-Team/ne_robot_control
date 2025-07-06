@@ -22,11 +22,9 @@
 #include "dji_motor.h"
 #include "daemon.h"
 
-osThreadId motorTaskHandle;
 osThreadId daemonTaskHandle;
 
 
-void StartMotorTask(void const *argument);
 void StartDaemonTask(void const *argument);
 
 /**
@@ -37,29 +35,9 @@ void StartDaemonTask(void const *argument);
 void RobotOSTaskCreate(void)
 {
     osThreadDef(deamon, StartDaemonTask, osPriorityNormal, 0, 128);
-    motorTaskHandle = osThreadCreate(osThread(deamon), NULL);
-
-    osThreadDef(motor, StartMotorTask, osPriorityNormal, 0, 256);
-    daemonTaskHandle = osThreadCreate(osThread(motor), NULL);
+    daemonTaskHandle = osThreadCreate(osThread(deamon), NULL);
 }
 
-
-__attribute__((noreturn)) void StartMotorTask(void const *argument)
-{
-    static float motor_dt;
-    static float motor_start;
-    LOGINFO("[freeRTOS] MOTOR Task Start");
-    for (;;)
-    {  
-        // 500Hz
-        motor_start = DWT_GetTimeline_ms();
-        DJIMotorControl();
-        motor_dt = DWT_GetTimeline_ms() - motor_start;
-        if (motor_dt > 2)
-            LOGERROR("[freeRTOS] MOTOR Task is being DELAY! dt = [%f]", &motor_dt);
-        osDelay(2);
-    }
-}
 
 __attribute__((noreturn)) void StartDaemonTask(void const *argument)
 {
