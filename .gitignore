@@ -139,3 +139,5 @@ Thumbs.db         # Windows 缩略图缓存
 compile_commands.json
 *.log
 .clangd
+.vscode/c_cpp_properties.json
+.vscode/keil_project_properties.json
