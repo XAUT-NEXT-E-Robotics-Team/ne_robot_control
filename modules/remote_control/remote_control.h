@@ -20,6 +20,7 @@
 
 
 
+
 #define RC_FRAME_NUM     25u
 
 //FSI6遥控的数据
@@ -39,6 +40,18 @@ typedef struct
     uint8_t FSI6_Flag;
     uint8_t FSI6_End;
 }FSI6Data_t;
+
+
+
+/*********外部接口**********/
+
+/**
+ * @brief FSI6遥控器模块初始化函数
+ * 
+ * @param rc_usart_handle 使用的串口号
+ * @return RC_ctrl_t* 
+ */
+FSI6Data_t *FSI6RemoteControlInit(UART_HandleTypeDef *rc_usart_handle);
 
 
 #endif 

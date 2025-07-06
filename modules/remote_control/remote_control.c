@@ -69,12 +69,6 @@ static void RCLostCallback(void *id)
     LOGWARNING("[rc] remote control lost");
 }
 
-/**
- * @brief FSI6遥控器模块初始化函数
- * 
- * @param rc_usart_handle 使用的串口号
- * @return RC_ctrl_t* 
- */
 FSI6Data_t *FSI6RemoteControlInit(UART_HandleTypeDef *rc_usart_handle)
 {
     USART_Init_Config_s conf;

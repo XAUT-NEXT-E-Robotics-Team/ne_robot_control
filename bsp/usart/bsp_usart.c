@@ -11,7 +11,7 @@
 #include "bsp_usart.h"
 #include "bsp_log.h"
 #include "stdlib.h"
-#include "memory.h"
+#include "string.h"
 
 /* usart service instance, modules' info would be recoreded here using USARTRegister() */
 /* usart服务实例,所有注册了usart的模块信息会被保存在这里 */

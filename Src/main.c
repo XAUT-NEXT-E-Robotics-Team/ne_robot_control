@@ -35,7 +35,6 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "task_init.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -121,7 +120,7 @@ int main(void)
   MX_CRC_Init();
   MX_DAC_Init();
   /* USER CODE BEGIN 2 */
-  TaskInit(); // Initialize all tasks and FreeRTOS objects
+ 
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in cmsis_os2.c) */
