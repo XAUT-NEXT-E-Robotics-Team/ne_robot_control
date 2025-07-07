@@ -34,16 +34,16 @@ static DaemonInstance *rc_daemon_instance;
 static void GetFSI6Data(uint8_t *buf)
 {
     fsi6Data.FSI6Start = buf[0];
-    fsi6Data.R_CH1 = ((uint16_t)buf[1] >> 0 | ((uint16_t)buf[2] << 8 )) & 0x07FF;
-    fsi6Data.R_CH2 = ((uint16_t)buf[2] >> 3 | ((uint16_t)buf[3] << 5 )) & 0x07FF;
-    fsi6Data.L_CH3 = ((uint16_t)buf[3] >> 6 | ((uint16_t)buf[4] << 2 ) | (uint16_t)buf[5] << 10 ) & 0x07FF;
-    fsi6Data.L_CH4 = ((uint16_t)buf[5] >> 1 | ((uint16_t)buf[6] << 7 )) & 0x07FF;
+    fsi6Data.R_LR = (((uint16_t)buf[1] >> 0 | ((uint16_t)buf[2] << 8 )) & 0x07FF)-RC_STICK_MID;
+    fsi6Data.R_UD = (((uint16_t)buf[2] >> 3 | ((uint16_t)buf[3] << 5 )) & 0x07FF)-RC_STICK_MID;
+    fsi6Data.L_UD = (((uint16_t)buf[3] >> 6 | ((uint16_t)buf[4] << 2 ) | (uint16_t)buf[5] << 10 ) & 0x07FF) - RC_STICK_MID;
+    fsi6Data.L_LR = (((uint16_t)buf[5] >> 1 | ((uint16_t)buf[6] << 7 )) & 0x07FF)-RC_STICK_MID;
     fsi6Data.SA_CH5 = ((uint16_t)buf[6] >> 4 | ((uint16_t)buf[7] << 4 )) & 0x07FF;
     fsi6Data.SB_CH6 = ((uint16_t)buf[7] >> 7 | ((uint16_t)buf[8] << 1 ) | (uint16_t)buf[9] << 9 ) & 0x07FF;
     fsi6Data.SC_CH7 = ((uint16_t)buf[9] >> 2 | ((uint16_t)buf[10] << 6 )) & 0x07FF;
     fsi6Data.SD_CH8 = ((uint16_t)buf[10] >> 5 | ((uint16_t)buf[11] << 3 )) & 0x07FF;
-    fsi6Data.V1_CH9 = ((uint16_t)buf[12] >> 0 | ((uint16_t)buf[13] << 8 )) & 0x07FF;
-    fsi6Data.V2_CH10 = ((uint16_t)buf[13] >> 3 | ((uint16_t)buf[14] << 5 )) & 0x07FF;
+    fsi6Data.V1_L = ((uint16_t)buf[12] >> 0 | ((uint16_t)buf[13] << 8 )) & 0x07FF;
+    fsi6Data.V2_R = ((uint16_t)buf[13] >> 3 | ((uint16_t)buf[14] << 5 )) & 0x07FF;
     fsi6Data.FSI6_Flag = buf[23];
     fsi6Data.FSI6_End = buf[24];
 }
