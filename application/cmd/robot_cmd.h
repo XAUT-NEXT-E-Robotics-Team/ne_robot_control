@@ -8,4 +8,7 @@
 void RobotCmdInit(void);
 
 
+/* ROBOT核心控制任务,200Hz频率运行(必须高于视觉发送频率) */
+void RoBotCmdTask(void);
+
 #endif // !ROBOT_CMD_H

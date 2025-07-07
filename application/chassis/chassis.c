@@ -13,11 +13,13 @@
 
 #include "chassis.h"
 #include "robot_def.h"
-#include "dji_motor.h"
+
 #include "message_center.h"
+#include "dji_motor.h"
+#include "arm_math.h"
 #include "general_def.h"
 #include "bsp_dwt.h"
-#include "arm_math.h"
+
 #include "motor_def.h"
 /*根据robot_def.h中的macro自动计算的参数*/
 #define HALF_WHEEL_BASE   (WHEEL_BASE / 2.0f)     //半轴长
@@ -51,20 +53,20 @@ void ChassisInit()
     .can_init_config.can_handle =  &hcan2 ,
     .controller_param_init_config = {
       .speed_PID = {  
-      .Kd = 0.5f,
-      .Ki = 0.1f,
+      .Kd = 5.0f,
+      .Ki = 0.05f,
       .Kp = 0.01f,
-      .IntegralLimit = 3000,
+      .IntegralLimit = 1000.0f,
       .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement,
-      .MaxOut = 12000,
+      .MaxOut = 16384.0f,
       },
       .current_PID ={
-        .Kp = 0.5f,
-        .Ki = 0.1f,
-        .Kd = 0.01f,
-        .IntegralLimit = 3000,
-        .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement,
-        .MaxOut = 12000,
+      .Kp = 0.5f,
+      .Ki = 0.1f,
+      .Kd = 0.01f,
+      .IntegralLimit = 1000.0f,
+      .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement,
+      .MaxOut = 16384.0f,
       },
    },
     .controller_setting_init_config = {
@@ -97,10 +99,10 @@ chassis_pub = PubRegister("chassis_feed", sizeof(Chassis_Upload_Data_s));
  */
 static void MecanumCalculate()
 {
-   chassis_motor1_speed =  (chassis_vx-chassis_vw*R)*arm_cos_fp32(45) + (chassis_vy + chassis_vw*R)*arm_sin_fp32(45) ;  
-   chassis_motor2_speed =  (chassis_vx-chassis_vw*R)*arm_cos_fp32(135) + (chassis_vy + chassis_vw*R)*arm_sin_fp32(135) ;     
-   chassis_motor2_speed =  (chassis_vx-chassis_vw*R)*arm_cos_fp32(-135) + (chassis_vy + chassis_vw*R)*arm_sin_fp32(-135) ;  
-   chassis_motor2_speed =  (chassis_vx-chassis_vw*R)*arm_cos_fp32(-45) + (chassis_vy + chassis_vw*R)*arm_sin_fp32(-45) ;  
+   chassis_motor1_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(45) + (chassis_vy + chassis_vw*R)* arm_sin_f32(45) ;  
+   chassis_motor2_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(135) + (chassis_vy + chassis_vw*R)* arm_sin_f32(135) ;     
+   chassis_motor2_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(-135) + (chassis_vy + chassis_vw*R)* arm_sin_f32(-135) ;  
+   chassis_motor2_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(-45) + (chassis_vy + chassis_vw*R)* arm_sin_f32(-45) ;  
 }
 
 /**

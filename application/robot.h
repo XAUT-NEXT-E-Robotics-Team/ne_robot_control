@@ -7,7 +7,11 @@
  */
 void robot_init(void);
 
-
+/**
+* @brief ROBOT底盘，云台，发射 ，控制 任务（机器人的核心）
+ * 
+ */
+void RobotTask(void);
 
 
 

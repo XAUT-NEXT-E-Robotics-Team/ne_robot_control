@@ -11,11 +11,23 @@
 
 #include "robot.h"
 #include "robot_task.h"
-
+#include "chassis.h"
 void robot_init(void)
 {
     BSPInit();
     RobotCmdInit();
-    
+    ChassisInit();
     LOGINFO("[robot] Robot Init Success");
 }
+
+
+
+
+
+//ROBOT底盘，云台，发射 ，控制 任务
+void RobotTask(void){
+RoBotCmdTask();
+ChassisTask();
+}
+
+

@@ -33,7 +33,12 @@ typedef struct
     uint8_t FSI6_End;
 }FSI6Data_t;
 
-
+//按键状态
+typedef enum {
+RC_SW_UP = 240,     //按键未按下
+RC_SW_MID = 1024,     //按键中间值
+RC_SW_DOWN =1807,      //按键按下
+}RC_SW_STATE_e   ;
 
 /*********外部接口**********/
 

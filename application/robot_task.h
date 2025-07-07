@@ -18,7 +18,7 @@
 
 #include "FreeRTOS.h"
 #include "task.h"
-
+#include "robot.h"
 #include "cmsis_os.h"
 #include "bsp_dwt.h"
 #include "dji_motor.h"
@@ -27,10 +27,10 @@
 #include "bsp_init.h"
 
 osThreadId daemonTaskHandle;
-
+osThreadId RobotTaskHandle;
 
 void StartDaemonTask(void const *argument);
-
+void StartRoBotTask(void const *argument);
 /**
  * @brief 创建相关任务
  * @
@@ -40,6 +40,8 @@ void RobotOSTaskCreate(void)
 {
     osThreadDef(deamon, StartDaemonTask, osPriorityNormal, 0, 128);
     daemonTaskHandle = osThreadCreate(osThread(deamon), NULL);
+    osThreadDef(Robot,StartRoBotTask,osPriorityNormal,0,1024);
+    RobotTaskHandle = osThreadCreate(osThread(Robot),NULL);
 }
 
 
@@ -59,6 +61,28 @@ __attribute__((noreturn)) void StartDaemonTask(void const *argument)
         osDelay(10);
     }  
 }
+
+__attribute__((noreturn)) void StartRoBotTask(void const *argument)
+{
+ static float RoBot_dt;
+ static float RoBot_start;
+LOGINFO("[freeRTOS] RoBot Task Start");
+for(;;){
+        //500Hz
+        RoBot_start = DWT_GetTimeline_ms();
+        RobotTask() ;
+        RoBot_dt = DWT_GetTimeline_ms() - RoBot_start;
+        if(RoBot_dt>5)
+         LOGERROR("[freeRTOS] chassis Task is being DELAY! dt = [%f]",&RoBot_dt);
+         osDelay(5);
+    }
+}
+
+
+
+
+
+
 #endif
 
 

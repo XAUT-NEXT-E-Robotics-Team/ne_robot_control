@@ -1,7 +1,27 @@
 #include "message_center.h"
-#include "stdlib.h"
 #include "string.h"
+#include "stdlib.h"
 #include "bsp_log.h"
+
+
+/**
+ * @brief 计算字符串的长度，但不超过指定的最大长度。
+ * @param s 指向要计算长度的字符串的指针。
+ * @param maxlen 要检查的最大字节数。
+ * @return size_t 返回字符串的实际长度（不包括结尾的'\0'），
+ * 如果达到了maxlen仍未找到'\0'，则返回maxlen。
+ */
+size_t strnlen(const char *s, size_t maxlen)
+{
+    size_t len = 0;
+    while (len < maxlen && *s)
+    {
+        s++;
+        len++;
+    }
+    return len;
+}
+
 
 /* message_center是fake head node,是方便链表编写的技巧,这样就不需要处理链表头的特殊情况 */
 static Publisher_t message_center = {

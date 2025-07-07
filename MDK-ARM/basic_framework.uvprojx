@@ -16,8 +16,8 @@
         <TargetCommonOption>
           <Device>STM32F407IGHx</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32F4xx_DFP.2.16.0</PackID>
-          <PackURL>http://www.keil.com/pack/</PackURL>
+          <PackID>Keil.STM32F4xx_DFP.2.17.1</PackID>
+          <PackURL>https://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000-0x2001BFFF) IRAM2(0x2001C000-0x2001FFFF) IROM(0x8000000-0x80FFFFF) CLOCK(25000000) FPU2 CPUTYPE("Cortex-M4")</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F407xx,__TARGET_FPU_VFP,ARM_MATH_CM4,__CC_ARM</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../Middlewares/ST/STM32_USB_Device_Library/Core/Inc;../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../Middlewares/ST/ARM/DSP/Inc;../bsp/can;../bsp/dwt;../bsp/log;../bsp;../Middlewares/Third_Party/SEGGER/Config;../Middlewares/Third_Party/SEGGER/RTT;../modules/algorithm;../modules/daemon;../modules/DJImotor;../modules;../application;../bsp/usart;../modules/remote_control;../application/cmd;..\application\chassis;..\bsp\usart</IncludePath>
+              <IncludePath>../Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../Middlewares/ST/STM32_USB_Device_Library/Core/Inc;../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../Middlewares/ST/ARM/DSP/Inc;../bsp/can;../bsp/dwt;../bsp/log;../bsp;../Middlewares/Third_Party/SEGGER/Config;../Middlewares/Third_Party/SEGGER/RTT;../modules/algorithm;../modules/daemon;../modules/DJImotor;../modules;../application;../bsp/usart;../modules/remote_control;../application/cmd;../application/chassis;../modules/message_center</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -809,6 +809,11 @@
               <FileType>1</FileType>
               <FilePath>..\modules\remote_control\remote_control.c</FilePath>
             </File>
+            <File>
+              <FileName>message_center.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\modules\message_center\message_center.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -845,9 +850,6 @@
               <FilePath>..\application\chassis\chassis.c</FilePath>
             </File>
           </Files>
-        </Group>
-        <Group>
-          <GroupName>::CMSIS</GroupName>
         </Group>
         <Group>
           <GroupName>Middlewares/Library/DSP Library/DSP Library</GroupName>
@@ -946,6 +948,9 @@
               </FileOption>
             </File>
           </Files>
+        </Group>
+        <Group>
+          <GroupName>::CMSIS</GroupName>
         </Group>
       </Groups>
     </Target>
