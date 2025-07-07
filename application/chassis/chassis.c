@@ -98,10 +98,10 @@ void ChassisInit()
  */
 static void MecanumCalculate()
 {
-  chassis_motor1_speed = (chassis_vx - chassis_vw * R) * arm_cos_f32(45) + (chassis_vy + chassis_vw * R) * arm_sin_f32(45);
-  chassis_motor2_speed = (chassis_vx - chassis_vw * R) * arm_cos_f32(135) + (chassis_vy + chassis_vw * R) * arm_sin_f32(135);
-  chassis_motor2_speed = (chassis_vx - chassis_vw * R) * arm_cos_f32(-135) + (chassis_vy + chassis_vw * R) * arm_sin_f32(-135);
-  chassis_motor2_speed = (chassis_vx - chassis_vw * R) * arm_cos_f32(-45) + (chassis_vy + chassis_vw * R) * arm_sin_f32(-45);
+   chassis_motor1_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(45) + (chassis_vy + chassis_vw*R)* arm_sin_f32(45) ;  
+   chassis_motor2_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(135) + (chassis_vy + chassis_vw*R)* arm_sin_f32(135) ;     
+   chassis_motor3_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(-135) + (chassis_vy + chassis_vw*R)* arm_sin_f32(-135) ;  
+   chassis_motor4_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(-45) + (chassis_vy + chassis_vw*R)* arm_sin_f32(-45) ;  
 }
 
 /**
