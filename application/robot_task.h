@@ -25,6 +25,7 @@
 #include "daemon.h"
 #include "robot_cmd.h"
 #include "bsp_init.h"
+#include "motor_task.h"
 
 osThreadId daemonTaskHandle;
 osThreadId RobotTaskHandle;
@@ -91,9 +92,9 @@ __attribute__((noreturn)) void StartMotorTask(void const *argument)
         motor_start = DWT_GetTimeline_ms();
         MotorControlTask();
         motor_dt = DWT_GetTimeline_ms() - motor_start;
-        if (motor_dt > 2)
+        if (motor_dt > 1)
             LOGERROR("[freeRTOS] MOTOR Task is being DELAY! dt = [%f]", &motor_dt);
-        osDelay(2);
+        osDelay(1);
     }  
 } 
 

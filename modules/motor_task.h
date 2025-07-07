@@ -19,7 +19,7 @@
  * @note 好无语,就一个函数罢了,干脆全部放到头文件里好了.
  * 
  */
-void MotorControlTask();
+void MotorControlTask(void);
 
 #endif // !MOTOR_TASK_H
 

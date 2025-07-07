@@ -30,9 +30,9 @@
 
 static Publisher_t *chassis_pub;                            // 地盘信息发布者
 static Subscriber_t *chassis_sub;                           // 地盘信息订阅者
-static Chassis_Ctrl_Cmd_s chassis_cmd_recv;                 // 底盘接收控制命令
-static Chassis_Upload_Data_s chassis_feedback_date;         // 底盘上传数据
-static DJIMotorInstance *MOTOR1, *MOTOR2, *MOTOR3, *MOTOR4; // 四个电机实例
+Chassis_Ctrl_Cmd_s chassis_cmd_recv;                 // 底盘接收控制命令
+Chassis_Upload_Data_s chassis_feedback_date;         // 底盘上传数据
+DJIMotorInstance *MOTOR1, *MOTOR2, *MOTOR3, *MOTOR4; // 四个电机实例
 /*                                    __
  *                          x        |\
  *                          |          \ (w旋转速度方向)
@@ -53,36 +53,28 @@ void ChassisInit()
       .can_init_config.can_handle = &hcan2,
       .controller_param_init_config = {
           .speed_PID = {
-              .Kd = 5.0f,
+              .Kd = 0.001f,
               .Ki = 0.05f,
-              .Kp = 0.01f,
-              .IntegralLimit = 1000.0f,
-              .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement,
-              .MaxOut = 16384.0f,
-          },
-          .current_PID = {
-              .Kp = 0.5f,
-              .Ki = 0.1f,
-              .Kd = 0.01f,
+              .Kp = 5.0f, 
               .IntegralLimit = 1000.0f,
               .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement,
               .MaxOut = 16384.0f,
           },
       },
       .controller_setting_init_config = {
-          .angle_feedback_source = MOTOR_FEED,                         // 角度反馈来源为电机
-          .speed_feedback_source = MOTOR_FEED,                         // 速度反馈来源为电机
-          .feedforward_flag = CURRENT_FEEDFORWARD | SPEED_FEEDFORWARD, // 前馈标志
+          .speed_feedback_source = MOTOR_FEED,
+          .outer_loop_type = SPEED_LOOP,
+          .close_loop_type = SPEED_LOOP,
       },
       .motor_type = M3508, // 电机类型
   };
   chassis_motor_config.can_init_config.tx_id = 1; // 电机1的发送ID
   MOTOR1 = DJIMotorInit(&chassis_motor_config);   // 电机1实例化
 
-  chassis_motor_config.can_init_config.tx_id = 2; // 电机2的发送ID
+  chassis_motor_config.can_init_config.tx_id = 3; // 电机2的发送ID
   MOTOR2 = DJIMotorInit(&chassis_motor_config);   // 电机2实例化
 
-  chassis_motor_config.can_init_config.tx_id = 3; // 电机3的发送ID
+  chassis_motor_config.can_init_config.tx_id = 2; // 电机3的发送ID
   MOTOR3 = DJIMotorInit(&chassis_motor_config);   // 电机3实例化
 
   chassis_motor_config.can_init_config.tx_id = 4; // 电机4的发送ID
@@ -98,10 +90,10 @@ void ChassisInit()
  */
 static void MecanumCalculate()
 {
-   chassis_motor1_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(45) + (chassis_vy + chassis_vw*R)* arm_sin_f32(45) ;  
-   chassis_motor2_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(135) + (chassis_vy + chassis_vw*R)* arm_sin_f32(135) ;     
-   chassis_motor3_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(-135) + (chassis_vy + chassis_vw*R)* arm_sin_f32(-135) ;  
-   chassis_motor4_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(-45) + (chassis_vy + chassis_vw*R)* arm_sin_f32(-45) ;  
+   chassis_motor1_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(135) + (chassis_vy + chassis_vw*R)* arm_sin_f32(135) ;  
+   chassis_motor2_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(-135) + (chassis_vy + chassis_vw*R)* arm_sin_f32(-135) ;     
+   chassis_motor3_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(-45) + (chassis_vy + chassis_vw*R)* arm_sin_f32(-45) ;  
+   chassis_motor4_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(45) + (chassis_vy + chassis_vw*R)* arm_sin_f32(45) ;  
 }
 
 /**

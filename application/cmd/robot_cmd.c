@@ -19,7 +19,7 @@
 #include "bsp_dwt.h"
 #include "bsp_log.h"
 
-#define STICK_TO_SPEED_RATIO 0.02f // 摇杆到速度的比例系数
+float STICK_TO_SPEED_RATIO = 0.25f; // 摇杆到速度的比例系数
 
 Publisher_t *chassis_cmd_pub;  // 地盘控制指令发布者
 Subscriber_t *chassis_cmd_sub; // 地盘控制指令订阅者
@@ -41,15 +41,22 @@ void RobotCmdInit(void)
 static void RoBotCmdRemoteControlSet(void)
 {
     // 使能底盘模式
-    if (fs16data->SC_CH7 == RC_SW_MID)
+    if (fs16data->SC_CH7 == RC_SW_UP)
+    {
+        chassis_cmd_send.chassis_mode = chassis_stop;
+    }
+    else if (fs16data->SC_CH7 == RC_SW_MID)
     { 
         chassis_cmd_send.chassis_mode = chassis_unfollow;
+        chassis_cmd_send.VX = STICK_TO_SPEED_RATIO * (fs16data->L_UD); // 前后平移
+        chassis_cmd_send.VY = STICK_TO_SPEED_RATIO * (fs16data->L_LR); // 左右平移
     }
-    chassis_cmd_send.VX = STICK_TO_SPEED_RATIO * (fs16data->L_UD); // 前后平移
-    chassis_cmd_send.VY = STICK_TO_SPEED_RATIO * (fs16data->L_LR); // 左右平移
-    if (fs16data->SC_CH7 == RC_SW_DOWN && fs16data->V2_R > 200)
-    {                                            // 使能小陀螺
+    else if (fs16data->SC_CH7 == RC_SW_DOWN && fs16data->V2_R > 200)
+    {   
+        chassis_cmd_send.chassis_mode = chassis_ZiZhua;                                         
         chassis_cmd_send.WZ = (fs16data->V2_R)-RC_KNOB_MIN; // 由V2映射小陀螺的速度,并建立死区防止误触
+        chassis_cmd_send.VX = STICK_TO_SPEED_RATIO * (fs16data->L_UD); // 前后平移
+        chassis_cmd_send.VY = STICK_TO_SPEED_RATIO * (fs16data->L_LR); // 左右平移
     }
 }
 
