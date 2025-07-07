@@ -28,9 +28,10 @@
 
 osThreadId daemonTaskHandle;
 osThreadId RobotTaskHandle;
-
+osThreadId motorTaskHandle;
 void StartDaemonTask(void const *argument);
 void StartRoBotTask(void const *argument);
+void StartMotorTask(void const *argument);
 /**
  * @brief 创建相关任务
  * @
@@ -42,6 +43,8 @@ void RobotOSTaskCreate(void)
     daemonTaskHandle = osThreadCreate(osThread(deamon), NULL);
     osThreadDef(Robot,StartRoBotTask,osPriorityNormal,0,1024);
     RobotTaskHandle = osThreadCreate(osThread(Robot),NULL);
+    osThreadDef(motortask,StartMotorTask,osPriorityNormal,0,256);
+    motorTaskHandle = osThreadCreate(osThread(motortask),NULL);
 }
 
 
@@ -78,7 +81,21 @@ for(;;){
     }
 }
 
-
+__attribute__((noreturn)) void StartMotorTask(void const *argument)
+{
+    static float motor_dt;
+    static float motor_start;
+    LOGINFO("[freeRTOS] MOTOR Task Start");
+    for (;;)
+    {
+        motor_start = DWT_GetTimeline_ms();
+        MotorControlTask();
+        motor_dt = DWT_GetTimeline_ms() - motor_start;
+        if (motor_dt > 2)
+            LOGERROR("[freeRTOS] MOTOR Task is being DELAY! dt = [%f]", &motor_dt);
+        osDelay(2);
+    }  
+} 
 
 
 
