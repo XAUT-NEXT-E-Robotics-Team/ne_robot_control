@@ -79,6 +79,9 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
+	__HAL_RCC_HSI_ENABLE(); // 启用 HSI
+  __HAL_RCC_SYSCLK_CONFIG(RCC_SYSCLKSOURCE_HSI); // 切换系统时钟为 HSI
+  /* USER CODE END 1 */
 
   /* USER CODE END 1 */
 
