@@ -13,32 +13,74 @@
 //机器人状态
 typedef enum 
 {
-ROBOT_STOP=0,
-ROBOT_READY
+  ROBOT_STOP=0,
+  ROBOT_READY
 } Robot_Status_e;
 
 //APP状态
 typedef enum 
 {
-APP_OFFLINE=0,
-APP_ONLINE,
-APP_ERROR
+  APP_OFFLINE=0,
+  APP_ONLINE,
+  APP_ERROR
 }App_State_e;
 
-//地盘模式设置
+//底盘模式设置
 typedef enum 
 {
-chassis_stop=0,       //有力停止模式
-chassis_follow,       //地盘跟随模式
-chassis_unfollow,     //地不跟随模式
-chassis_ZiZhua,       //小陀螺模式
+  chassis_stop=0,       //有力停止模式
+  chassis_follow,       //地盘跟随模式
+  chassis_unfollow,     //地不跟随模式
+  chassis_ZiZhua,       //小陀螺模式
 }chassis_mode_e;
 
+// 云台模式设置
 typedef enum 
 {
-enemecolor_none=0,
-enemycolor_red  ,
-enemycolor_blue
+  GIMBAL_STOP =0 ,
+  GIMBAL_FREE_MODE ,   //gimbal  自由模式（底盘为NO_FOLLOW）YAW电机反馈为taltol angel       
+  GIMBAL_GYRO_MODE ,   //gimbal  陀螺仪反馈模式，反馈值为陀螺仪pitch,yaw_taltol angel
+}gimbal_mode_e;
+
+// 发射模式设置
+typedef enum
+{
+ SHOOT_OFF = 0 ,       
+ SHOOT_ON ,
+}shoot_mode_e;
+
+// 摩擦轮
+typedef enum 
+{
+ FRICTION_OFF = 0 ,   //摩擦轮关闭
+ FRICTION_ON          //摩擦轮开启
+}friction_mode_e  ;
+
+// 发射状态
+typedef enum 
+{
+LOAD_STOP = 0 , //STOP SHOOTING
+LOAD_REVERSE  , //反转
+LOAD_1_BULLET , //shoot once
+LOAD_2_BULLET , //shoot 2 
+LOAD_3_BULLET , //shoot 3
+LOAD_BURSTFIRE, //shoting 
+}loader_mode_e;
+
+// shoot_speed(need to pack to master_process.h)
+typedef enum
+{
+ BULLET_SPEED_NONE = 0 ,
+ BULLET_SPEED1 = 15   ,
+ BULLET_SPEED2 = 18 
+}Blluet_Speed_e;
+
+// enemy color
+typedef enum 
+{//Vsion_send
+  enemecolor_none=0,
+  enemycolor_red  ,
+  enemycolor_blue
 } Enemy_color_e ;
 
 
@@ -49,22 +91,44 @@ enemycolor_blue
  */
 // cmd发布的底盘控制数据,由chassis订阅
 
-typedef struct {
-//
-float VX;          //底盘前进速度,单位mm/s
-float VY;          //底盘横向速度,单位mm/s
-float WZ;          //底盘角速度,单位rad/s
-float offset_angle; //地盘与归中位置的夹角
-chassis_mode_e  chassis_mode ;//地盘模式
-int chassis_speed_buff;
+typedef struct 
+{//CMD_CHASSIS_CONTROL
+ float VX;          //底盘前进速度,单位mm/s
+ float VY;          //底盘横向速度,单位mm/s
+ float WZ;          //底盘角速度,单位rad/s
+ float offset_angle; //底盘与归中位置的夹角
+ chassis_mode_e  chassis_mode ;//底盘模式
+ int chassis_speed_buff;
 }Chassis_Ctrl_Cmd_s;
+
+typedef struct 
+{//CMD_GIMBAL_CONTROL
+ float yaw    ;
+ float pitch  ;
+ float chassis_wz ;
+ gimbal_mode_e gimbal_mode;
+}Gimbal_Ctrol_Cmd_s;
+
+typedef struct 
+{//CMD_SHOOT_CONTROL
+ shoot_mode_e  shoot_mode ;           //发射   mode choose
+ loader_mode_e loader_mode ;          //发射   state
+ friction_mode_e friction_mode ;      //摩擦轮 state
+ Blluet_Speed_e  Blluet_speed ;       //shoot speed
+ uint8_t shoot_freqlimit ;            //射频限制
+ float shoot_rate ;                   //当前射频 
+}Shoot_Ctrol_Cmd_s;
+
+
+
+
 
 /* ----------------gimbal/shoot/chassis发布的反馈数据----------------*/
 /**
  * @brief 由cmd订阅,其他应用也可以根据需要获取.
  *
  */
-
+//双机通信
 typedef struct {
 //float chassis_vx;          //底盘前进速度,单位mm/s
 //float chassis_vy;          //底盘横向速度,单位mm/s
