@@ -8,27 +8,38 @@
 #define RADIUS_WHEEL 60.0f            //轮子半径,单位mm   
 #define REDUCTION_WHEEL 19.0f         //轮子减速比
 #define R        270.0f               //半径  mm
+
+#pragma pack(1) 
 //机器人状态
-typedef enum {
+typedef enum 
+{
 ROBOT_STOP=0,
 ROBOT_READY
 } Robot_Status_e;
 
 //APP状态
-typedef enum {
+typedef enum 
+{
 APP_OFFLINE=0,
 APP_ONLINE,
 APP_ERROR
 }App_State_e;
 
 //地盘模式设置
-typedef enum {
+typedef enum 
+{
 chassis_stop=0,       //有力停止模式
 chassis_follow,       //地盘跟随模式
 chassis_unfollow,     //地不跟随模式
 chassis_ZiZhua,       //小陀螺模式
 }chassis_mode_e;
 
+typedef enum 
+{
+enemecolor_none=0,
+enemycolor_red  ,
+enemycolor_blue
+} Enemy_color_e ;
 
 
 /* ----------------CMD应用发布的控制数据,应当由gimbal/chassis/shoot订阅---------------- */
@@ -55,18 +66,15 @@ int chassis_speed_buff;
  */
 
 typedef struct {
-
-float chassis_vx;          //底盘前进速度,单位mm/s
-float chassis_vy;          //底盘横向速度,单位mm/s
-float chassis_wz;          //底盘角速度,单位rad/s
-float chassis_motor1_speed; //电机1速度,单位mm/s
-float chassis_motor2_speed; //电机2速度,单位mm/s    
-float chassis_motor3_speed; //电机3速度,单位mm/s
-float chassis_motor4_speed; //电机4速度,单位mm/s    
-
+//float chassis_vx;          //底盘前进速度,单位mm/s
+//float chassis_vy;          //底盘横向速度,单位mm/s
+//float chassis_wz;          //底盘角速度,单位rad/s
+uint8_t  shoot_freqlimit  ;//根据热量剩余量，设置弹频限制
+uint8_t  shoot_Speed;      //弹速
+Enemy_color_e Enemy_color ;//敌人的颜色  1 为RED   2为BLUE
 } Chassis_Upload_Data_s;
 
 
-
+#pragma pack() //恢复默认对齐方式
 
 #endif // ROBOT_DEF_H

@@ -21,15 +21,20 @@
 #include "bsp_dwt.h"
 
 #include "motor_def.h"
+#include "can_comm.h"
 /*根据robot_def.h中的macro自动计算的参数*/
 #define HALF_WHEEL_BASE (WHEEL_BASE / 2.0f)        // 半轴长
 #define HALF_TRACK_WIDTH (TRACK_WIDTH / 2.0f)      // 半轮距
 #define PERIMETER_WHEEL (RADIUS_WHEEL * 2.0F * PI) // 轮子周长
 
+/*双机通信*/
+CANCommInstance *chassis_can_comm ; 
+
+
 /* 底盘应用包含的模块和信息存储,底盘是单例模式,因此不需要为底盘建立单独的结构体 */
 
-static Publisher_t *chassis_pub;                            // 地盘信息发布者
-static Subscriber_t *chassis_sub;                           // 地盘信息订阅者
+//static Publisher_t *chassis_pub;                            // 地盘信息发布者
+//static Subscriber_t *chassis_sub;                           // 地盘信息订阅者
 Chassis_Ctrl_Cmd_s chassis_cmd_recv;                 // 底盘接收控制命令
 Chassis_Upload_Data_s chassis_feedback_date;         // 底盘上传数据
 DJIMotorInstance *MOTOR1, *MOTOR2, *MOTOR3, *MOTOR4; // 四个电机实例
@@ -42,7 +47,7 @@ DJIMotorInstance *MOTOR1, *MOTOR2, *MOTOR3, *MOTOR4; // 四个电机实例
  *                          |
  *                MOTOR3    |   MOTOR4
  */
-static float ZiZhuan_t;                                                                              // 小陀螺自转的时间标志
+// float ZiZhuan_t;                                                                              // 小陀螺自转的时间标志
 float chassis_vx, chassis_vy, chassis_vw;                                                     // 云台速度的投影，平移速度，前进速度，旋转速度
 float chassis_motor1_speed, chassis_motor2_speed, chassis_motor3_speed, chassis_motor4_speed; // 解算到四个电机的速度
 
@@ -57,7 +62,7 @@ void ChassisInit()
               .Ki = 0.05f,
               .Kp = 5.0f, 
               .IntegralLimit = 1000.0f,
-              .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement,
+              .Improve = (PID_Improvement_e)(PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement),
               .MaxOut = 16384.0f,
           },
       },
@@ -80,8 +85,17 @@ void ChassisInit()
   chassis_motor_config.can_init_config.tx_id = 4; // 电机4的发送ID
   MOTOR4 = DJIMotorInit(&chassis_motor_config);   // 电机4实例化
 
-  chassis_sub = SubRegister("chassis_cmd", sizeof(Chassis_Ctrl_Cmd_s));
-  chassis_pub = PubRegister("chassis_feed", sizeof(Chassis_Upload_Data_s));
+  //双机通信CAN_comm初始化
+  CANComm_Init_Config_s config = {
+      .can_config = {
+        .can_handle = &hcan1 ,
+        .rx_id = 0x311,
+        .tx_id = 0x312,
+      },
+      .send_data_len = sizeof(Chassis_Upload_Data_s) , //底盘上传数据
+      .recv_data_len = sizeof(Chassis_Ctrl_Cmd_s),     //底盘接受云台CMD数据
+  };
+  chassis_can_comm = CANCommInit(&config);   // CHASSIS_BOARD
 }
 
 /**
@@ -112,7 +126,9 @@ static void LimitChassisOutput()
 /* 机器人底盘控制核心任务 */
 void ChassisTask()
 {
-  SubGetMessage(chassis_sub, &chassis_cmd_recv); // 订阅者接受数据
+  //上板命令传入下板
+  chassis_cmd_recv = *(Chassis_Ctrl_Cmd_s*)CANCommGet(chassis_can_comm);
+
   if (chassis_cmd_recv.chassis_mode == chassis_stop)
   { // STOP_MODE
     DJIMotorStop(MOTOR1);
@@ -150,6 +166,6 @@ void ChassisTask()
 
   // 根据裁判系统的反馈数据和电容数据对输出限幅并设定闭环参考值
   LimitChassisOutput();
-  // 推送信息
-  PubPushMessage(chassis_pub, (void *)&chassis_feedback_date);
+  // 反馈数据给上板
+  CANCommSend(chassis_can_comm,(void *)&chassis_feedback_date);
 }
