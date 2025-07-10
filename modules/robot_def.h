@@ -1,6 +1,8 @@
 #ifndef ROBOT_DEF_H
 #define ROBOT_DEF_H
-
+/* 
+*@ 此部分云台底盘都使用
+*/
 #include "stdint.h"
 
 #define CENTER_GIMBAL_OFFSET_X 0.0f   //云台中心偏移x轴
@@ -119,17 +121,15 @@ typedef struct
  float shoot_rate ;                   //当前射频 
 }Shoot_Ctrol_Cmd_s;
 
-
-
-
-
 /* ----------------gimbal/shoot/chassis发布的反馈数据----------------*/
 /**
  * @brief 由cmd订阅,其他应用也可以根据需要获取.
  *
  */
-//双机通信
-typedef struct {
+//application subscriber struct
+
+typedef struct 
+{
 //float chassis_vx;          //底盘前进速度,单位mm/s
 //float chassis_vy;          //底盘横向速度,单位mm/s
 //float chassis_wz;          //底盘角速度,单位rad/s
@@ -138,6 +138,11 @@ uint8_t  shoot_Speed;      //弹速
 Enemy_color_e Enemy_color ;//敌人的颜色  1 为RED   2为BLUE
 } Chassis_Upload_Data_s;
 
+typedef struct 
+{
+  //atitude_t gimbal_imu_date ; (waiting for imu part)
+  uint16_t yaw_motor_single_round_angle;
+}Gimbal_Upload_Date_s;
 
 #pragma pack() //恢复默认对齐方式
 

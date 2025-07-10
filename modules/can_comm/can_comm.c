@@ -1,6 +1,5 @@
 #include "can_comm.h"
 #include "crc8.h"
-//#include "memory.h"
 #include "stdlib.h"
 #include "bsp_dwt.h"
 #include "bsp_log.h"

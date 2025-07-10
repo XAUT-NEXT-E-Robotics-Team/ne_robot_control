@@ -12,6 +12,7 @@
 #include "robot.h"
 #include "robot_task.h"
 #include "chassis.h"
+#include "gimbal.h"
 void robot_init(void)
 {
     BSPInit();
@@ -26,6 +27,7 @@ void RobotTask(void)
 {
     RoBotCmdTask();
     ChassisTask();
+    GimbalTask();
 }
 
 

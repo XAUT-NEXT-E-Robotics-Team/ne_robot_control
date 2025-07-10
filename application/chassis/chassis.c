@@ -33,8 +33,8 @@ CANCommInstance *chassis_can_comm ;
 
 /* 底盘应用包含的模块和信息存储,底盘是单例模式,因此不需要为底盘建立单独的结构体 */
 
-//static Publisher_t *chassis_pub;                            // 地盘信息发布者
-//static Subscriber_t *chassis_sub;                           // 地盘信息订阅者
+// Publisher_t *chassis_pub;                            // 地盘信息发布者
+// Subscriber_t *chassis_sub;                           // 地盘信息订阅者
 Chassis_Ctrl_Cmd_s chassis_cmd_recv;                 // 底盘接收控制命令
 Chassis_Upload_Data_s chassis_feedback_date;         // 底盘上传数据
 DJIMotorInstance *MOTOR1, *MOTOR2, *MOTOR3, *MOTOR4; // 四个电机实例
@@ -104,10 +104,10 @@ void ChassisInit()
  */
 static void MecanumCalculate()
 {
-   chassis_motor1_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(135) + (chassis_vy + chassis_vw*R)* arm_sin_f32(135) ;  
-   chassis_motor2_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(-135) + (chassis_vy + chassis_vw*R)* arm_sin_f32(-135) ;     
-   chassis_motor3_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(-45) + (chassis_vy + chassis_vw*R)* arm_sin_f32(-45) ;  
-   chassis_motor4_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(45) + (chassis_vy + chassis_vw*R)* arm_sin_f32(45) ;  
+   chassis_motor1_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(135.0f) + (chassis_vy + chassis_vw*R)* arm_sin_f32(135.0f) ;  
+   chassis_motor2_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(-135.0f) + (chassis_vy + chassis_vw*R)* arm_sin_f32(-135.0f) ;     
+   chassis_motor3_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(-45.0f) + (chassis_vy + chassis_vw*R)* arm_sin_f32(-45.0f) ;  
+   chassis_motor4_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(45.0f) + (chassis_vy + chassis_vw*R)* arm_sin_f32(45.0f) ;  
 }
 
 /**
