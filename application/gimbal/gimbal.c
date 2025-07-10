@@ -49,7 +49,7 @@ Gimbal_Upload_Date_s gimbal_feedback_date;      //define gimbal_update struct ( 
       .controller_setting_init_config = {
         .angle_feedback_source = OTHER_FEED ,        // MOTOR_FEED|OTHER_FEED :使用后者需要指定数据来源
         .speed_feedback_source = MOTOR_FEED ,         //(暂时先用电机的反馈值) speed 可先用DJI电机来源 ，角度选择BMI088
-        .close_loop_type = ANGLE_LOOP | SPEED_LOOP , //速度环与角度环 
+        .close_loop_type =(Closeloop_Type_e)(ANGLE_LOOP | SPEED_LOOP) , //速度环与角度环 
         .motor_reverse_flag = MOTOR_DIRECTION_NORMAL , //电机正反转标志
          },
       .motor_type = GM6020 };  //电机类型
@@ -83,7 +83,7 @@ Gimbal_Upload_Date_s gimbal_feedback_date;      //define gimbal_update struct ( 
        .controller_setting_init_config = {
         .angle_feedback_source = OTHER_FEED ,
         .speed_feedback_source = MOTOR_FEED ,
-        .close_loop_type = ANGLE_LOOP | SPEED_LOOP ,
+        .close_loop_type = (Closeloop_Type_e)(ANGLE_LOOP | SPEED_LOOP) ,
         .motor_reverse_flag = MOTOR_DIRECTION_NORMAL ,
        },
        .motor_type = GM6020 }; 
