@@ -15,7 +15,7 @@
 void robot_init(void)
 {
     BSPInit();
-    RobotCmdInit();
+    //RobotCmdInit();
     RobotOSTaskCreate();
     LOGINFO("[robot] Robot Init Success");
 }
@@ -23,8 +23,8 @@ void robot_init(void)
 //ROBOT底盘，云台，发射 ，控制任务
 void RobotTask(void)
 {
-    RoBotCmdTask();
-    GimbalTask();
+    //RoBotCmdTask();
+    //GimbalTask();
 }
 
 
