@@ -132,7 +132,7 @@ void ShootTask()
     //FRICTION_MOTOR  
 if(shoot_cmd_recv.friction_mode == FRICTION_ON)
 {
-  switch(shoot_cmd_recv.Bllut_speed)
+  switch(shoot_cmd_recv.Blluet_speed)
   {
   case BULLET_SPEED1:                   //friction    speed = 15  (这个的实际去测一下)
     DJIMotorSetRef(frileftmotor,6000);      //(set speed :5500~7000)
