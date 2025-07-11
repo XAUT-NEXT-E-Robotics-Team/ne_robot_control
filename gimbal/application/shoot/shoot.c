@@ -129,8 +129,31 @@ void ShootTask()
       break ;
     }
 
+    //FRICTION_MOTOR  
+if(shoot_cmd_recv.friction_mode == FRICTION_ON)
+{
+  switch(shoot_cmd_recv.Bllut_speed)
+  {
+  case BULLET_SPEED1:                   //friction    speed = 15  (这个的实际去测一下)
+    DJIMotorSetRef(frileftmotor,6000);      //(set speed :5500~7000)
+    DJIMotorSetRef(frirightmotor,6000);
+    break;
+  case BULLET_SPEED2:                   //friction    speed = 18 
+    DJIMotorSetRef(frileftmotor,7000);      //(set speed :5500~7000)
+    DJIMotorSetRef(frirightmotor,7000);
+    break;
+  default:
+    DJIMotorSetRef(frileftmotor,7000);      //(set speed :5500~7000)
+    DJIMotorSetRef(frirightmotor,7000);
+    break;
+  }
+}
+else 
+{   // friction   speed = 0
+    DJIMotorSetRef(frileftmotor,0);
+    DJIMotorSetRef(frirightmotor,0);
+}
 
-
-
+//if need to send feedback date (use PubPushMessage)
 
 }
