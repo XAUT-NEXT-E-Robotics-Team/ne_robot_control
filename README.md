@@ -1,29 +1,34 @@
 # ne_robot_control
+
 ## 项目仍在开发中 仅限队内使用
-底层框架，部分算法库来自湖南大学RoboMaster跃鹿战队
 
-再次感谢大佬们的开源
+底层框架，部分算法库来自湖南大学RoboMaster跃鹿战队。
 
- <https://github.com/HNUYueLuRM/basic_framework>
+再次感谢大佬们的开源：<https://github.com/HNUYueLuRM/basic_framework>
+
+---
 
 ## 文件组织方式
 
-目前，战队的大部分机器人采用C板+双板控制架构
+目前，战队的大部分机器人采用C板+双板控制架构。
 
-若日后有迁移至 H7 控制器或采用单板控制架构的需求，将在本项目的其他分支中进行相应适配和开发
+若日后有迁移至 H7 控制器或采用单板控制架构的需求，将在本项目的其他分支中进行相应适配和开发。
 
 ne-robot-control/
+├── gimbal/
+│   ├── bsp/
+│   │   └── ...
+│   └── applications/
+│       └── ...
 │
 ├── chassis/
-│   ├── bsp...
-│   └── applications...
-│
-├── chassis/
-│   ├── bsp...
-│   └── applications...
+│   ├── bsp/
+│   │   └── ...
+│   └── applications/
+│       └── ...
 │
 └── debug/
-    └──  debug相关文件...
+└── debug相关文件...
 
 
 
