@@ -14,21 +14,6 @@
 
 若日后有迁移至 H7 控制器或采用单板控制架构的需求，将在本项目的其他分支中进行相应适配和开发。
 
-ne-robot-control/
-├── gimbal/
-│   ├── bsp/
-│   │   └── ...
-│   └── applications/
-│       └── ...
-│
-├── chassis/
-│   ├── bsp/
-│   │   └── ...
-│   └── applications/
-│       └── ...
-│
-└── debug/
-└── debug相关文件...
 
 
 
