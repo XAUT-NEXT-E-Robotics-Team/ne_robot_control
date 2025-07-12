@@ -36,7 +36,7 @@ Chassis_Upload_Data_s chassis_feedback_date; // 底盘feedback date 回传
 Publisher_t *gimbal_cmd_pub;  //cmd send publisher insatance
 Subscriber_t *gimbal_cmd_sub; //feedback subscriber insatance
 Gimbal_Ctrol_Cmd_s gimbal_cmd_send;  //云台控制指令发送结构体
-Gimbal_Upload_Date_s gimbal_feedback_date; //云台feedback date 回传
+Gimbal_Upload_Date_s gimbal_feedback; //云台feedback date 回传
 
 //SHOOT_CMD
 Publisher_t *shoot_cmd_pub ;  //cmd send publisher instance
@@ -128,7 +128,7 @@ void RoBotCmdTask(void)
 {   //双机通信传回数据（chassis---->gimbal） 
     chassis_feedback_date = *(Chassis_Upload_Data_s *)CANCommGet(cmd_can_comm); 
     //gimbal feedback date
-    SubGetMessage(gimbal_cmd_sub,&gimbal_feedback_date);
+    SubGetMessage(gimbal_cmd_sub,&gimbal_feedback);
     //shoot 暂时不加
 
 
