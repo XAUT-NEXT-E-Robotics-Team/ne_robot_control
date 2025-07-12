@@ -17,6 +17,8 @@ void robot_init(void)
     BSPInit();
     RobotCmdInit();
     RobotOSTaskCreate();
+    GimbalInit();
+    ShootInit();
     LOGINFO("[robot] Robot Init Success");
 }
 
@@ -25,6 +27,7 @@ void RobotTask(void)
 {
     RoBotCmdTask();
     GimbalTask();
+    ShootTask();
 }
 
 
