@@ -332,7 +332,7 @@ static void IMU_QuaternionEKF_xhatUpdate(KalmanFilter_t *kf)
     kf->MatStatus = Matrix_Multiply(&kf->temp_matrix, &kf->HT, &kf->temp_matrix1); // temp_matrix1 = H·P'(k)·HT
     kf->S.numRows = kf->R_KAL.numRows;
     kf->S.numCols = kf->R_KAL.numCols;
-biany    kf->MatStatus = Matrix_Add(&kf->temp_matrix1, &kf->R_KAL, &kf->S); // S = H P'(k) HT + R
+    kf->MatStatus = Matrix_Add(&kf->temp_matrix1, &kf->R_KAL, &kf->S); // S = H P'(k) HT + R
     kf->MatStatus = Matrix_Inverse(&kf->S, &kf->temp_matrix1);     // temp_matrix1 = inv(H·P'(k)·HT + R)
 
     q0 = kf->xhatminus_data[0];
