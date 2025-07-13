@@ -10,8 +10,13 @@
  */
 
 #include "robot.h"
-#include "robot_task.h"
 #include "gimbal.h"
+#include "shoot.h"
+#include "robot_task.h"
+
+
+
+
 void robot_init(void)
 {
     BSPInit();
