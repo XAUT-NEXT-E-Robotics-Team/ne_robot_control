@@ -1,3 +1,13 @@
+/**
+ * @file shoot.c
+ * @author cherishQA
+ * @brief 
+ * @version 0.1
+ * @date 2025-07-9
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
 #include "gimbal.h"
 #include "robot_def.h"          
 #include "dji_motor.h"       

@@ -1,6 +1,6 @@
 /**
  * @file robot_cmd.c
- * @author imgzw
+ * @author imgzw  
  * @brief 机器人控制指令发送/接收/处理
  * @version 0.1
  * @date 2025-07-06
@@ -19,19 +19,58 @@
 #include "bsp_dwt.h"
 #include "bsp_log.h"
 
-float STICK_TO_SPEED_RATIO = 0.25f; // 摇杆到速度的比例系数
+//双机通信
+#include "can_comm.h"
+CANCommInstance *cmd_can_comm ;
 
-Publisher_t *chassis_cmd_pub;  // 地盘控制指令发布者
-Subscriber_t *chassis_cmd_sub; // 地盘控制指令订阅者
+//FSI6
+float STICK_TO_SPEED_CHASSIS = 0.25f; // 摇杆到速度的比例系数(CHASSIS)
+float STICK_TO_SPEED_GIMBAL =  0.01; // 摇杆到速度的比例系数(GIMBAL)
 FSI6Data_t *fs16data;
+
+//CHASSIS_CMD
 Chassis_Ctrl_Cmd_s chassis_cmd_send; // 地盘控制指令发送结构体
-Robot_Status_e robot_state;          // robot整体工作状态
+Chassis_Upload_Data_s chassis_feedback_date; // 底盘feedback date 回传
+
+//GIMBAL_CMD
+Publisher_t *gimbal_cmd_pub;  //cmd send publisher insatance
+Subscriber_t *gimbal_cmd_sub; //feedback subscriber insatance
+Gimbal_Ctrol_Cmd_s gimbal_cmd_send;  //云台控制指令发送结构体
+Gimbal_Upload_Date_s gimbal_feedback; //云台feedback date 回传
+
+//SHOOT_CMD
+Publisher_t *shoot_cmd_pub ;  //cmd send publisher instance
+Subscriber_t *shoot_cmd_sub ; //feedback subscriber instance
+Shoot_Ctrol_Cmd_s shoot_cmd_send ; //发射控制指令的结构体
+//shoot回传数据暂时不需要，如果后面要做摩擦轮温度闭环控制弹速的话，可在后面加上
+//Shoot_Upload_Date_s
+
+// robot整体工作状态
+Robot_Status_e robot_state;          
+
+
 
 void RobotCmdInit(void)
 {
     fs16data = FSI6RemoteControlInit(&huart3);
-    chassis_cmd_pub = PubRegister("chassis_cmd", sizeof(Chassis_Ctrl_Cmd_s)); // 地盘控制指令发布者
-    robot_state = ROBOT_READY;                                                // robot进入准备状态
+    
+    gimbal_cmd_pub = PubRegister("gimbal_cmd", sizeof(Gimbal_Ctrol_Cmd_s)); //gimbal cmd control publisher register
+    gimbal_cmd_sub = SubRegister("gimbal_feed", sizeof(Gimbal_Upload_Date_s)); //gimbal feedback date subscriber register 
+    
+    shoot_cmd_pub = PubRegister("shoot_cmd", sizeof(Shoot_Ctrol_Cmd_s)); //shoot cmd control publisher register
+
+    CANComm_Init_Config_s comm_conf = {
+        .can_config = {
+        .can_handle = &hcan1 , //双机通信用can1 ，云台与底盘的其他电机用can2
+        .rx_id = 0x312 ,   //对应底盘tx_id
+        .tx_id = 0x311 ,   //对应底盘rx_id
+        },
+        .send_data_len = sizeof(Chassis_Ctrl_Cmd_s) ,  //send chassis cmd
+        .recv_data_len = sizeof(Chassis_Upload_Data_s) , //recive chassis feedback date
+    };
+    cmd_can_comm = CANCommInit(&comm_conf) ; //先初始化，在把初始化的参数赋给实例
+
+    robot_state = ROBOT_READY; // robot进入准备状态
 }
 
 /**
@@ -40,31 +79,64 @@ void RobotCmdInit(void)
  */
 static void RoBotCmdRemoteControlSet(void)
 {
-    // 使能底盘模式
+    //FSI6 MODE CHOOSE/switch  
+    //SC_LOGIC           ------->> gimbal and chassis mode
     if (fs16data->SC_CH7 == RC_SW_UP)
-    {
-        chassis_cmd_send.chassis_mode = chassis_stop;
+    {   
+         // disable all robot
+        chassis_cmd_send.chassis_mode = chassis_stop ;
+        gimbal_cmd_send.gimbal_mode = GIMBAL_STOP ; 
     }
     else if (fs16data->SC_CH7 == RC_SW_MID)
-    { 
-        chassis_cmd_send.chassis_mode = chassis_unfollow;
-        chassis_cmd_send.VX = STICK_TO_SPEED_RATIO * (fs16data->L_UD); // 前后平移
-        chassis_cmd_send.VY = STICK_TO_SPEED_RATIO * (fs16data->L_LR); // 左右平移
+    {   //enable all robot (follow mode)
+        chassis_cmd_send.chassis_mode = chassis_follow ;
+        gimbal_cmd_send.gimbal_mode = GIMBAL_GYRO_MODE ; 
     }
-    else if (fs16data->SC_CH7 == RC_SW_DOWN && fs16data->V2_R > 200)
+    else if (fs16data->SC_CH7 == RC_SW_DOWN && fs16data->V1_L > 200)
     {   
-        chassis_cmd_send.chassis_mode = chassis_ZiZhua;                                         
-        chassis_cmd_send.WZ = (fs16data->V2_R)-RC_KNOB_MIN; // 由V2映射小陀螺的速度,并建立死区防止误触
-        chassis_cmd_send.VX = STICK_TO_SPEED_RATIO * (fs16data->L_UD); // 前后平移
-        chassis_cmd_send.VY = STICK_TO_SPEED_RATIO * (fs16data->L_LR); // 左右平移
+        gimbal_cmd_send.gimbal_mode = GIMBAL_GYRO_MODE ;             
+        chassis_cmd_send.chassis_mode = chassis_ZiZhua;                                          
+        chassis_cmd_send.WZ = (fs16data->V2_R)-RC_KNOB_MIN; // 由V2映射小陀螺的速度,并建立死区防止误触(开启小陀螺，给WZ赋值)
     }
+
+    //SB_AND_V2_LOGIC      ------>> shoot mode
+    if(fs16data->V2_R>200)
+    { //enable friction motor    
+      shoot_cmd_send.shoot_mode = SHOOT_ON ;
+      //choose loader motor mode
+      switch (fs16data->SB_CH6)
+      {
+      case RC_SW_UP :
+      shoot_cmd_send.loader_mode = LOAD_STOP ;       // no fire
+        break;
+      case RC_SW_DOWN :                               
+      shoot_cmd_send.loader_mode = LOAD_BURSTFIRE ;  // fire
+      default:
+        break;
+      }
+    }
+
+   //传入遥控参量
+     chassis_cmd_send.VX = STICK_TO_SPEED_CHASSIS * (fs16data->L_UD); // 前后平移
+     chassis_cmd_send.VY = STICK_TO_SPEED_CHASSIS * (fs16data->L_LR); // 左右平移
+     gimbal_cmd_send.pitch = STICK_TO_SPEED_GIMBAL * (fs16data->R_UD) ; //上下移动
+     gimbal_cmd_send.yaw = STICK_TO_SPEED_GIMBAL * (fs16data->R_LR) ; //左右平移
 }
 
 /* ROBOT核心控制任务,200Hz频率运行(必须高于视觉发送频率) */
 void RoBotCmdTask(void)
-{
+{   //双机通信传回数据（chassis---->gimbal） 
+    chassis_feedback_date = *(Chassis_Upload_Data_s *)CANCommGet(cmd_can_comm); 
+    //gimbal feedback date
+    SubGetMessage(gimbal_cmd_sub,&gimbal_feedback);
+    //shoot 暂时不加
+
+
     // ROBOTcontrolSet
     RoBotCmdRemoteControlSet();
     // send chassis_cmd
-    PubPushMessage(chassis_cmd_pub, (void *)&chassis_cmd_send);
+    CANCommSend(cmd_can_comm,(void *)&chassis_cmd_send);
+    //send gimbal and shoot cmd
+    PubPushMessage(gimbal_cmd_pub,(void *)&gimbal_cmd_send);
+    PubPushMessage(shoot_cmd_pub ,(void *)&shoot_cmd_send) ;
 }
