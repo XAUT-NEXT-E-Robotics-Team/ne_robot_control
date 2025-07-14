@@ -150,3 +150,6 @@ compile_commands.json
 .vscode/cortex-debug.peripherals.json
 .vscode/cortex-debug.peripherals.state.json
 .vscode/cortex-debug.registers.state.json 
+gimbal/.vscode/c_cpp_properties.json
+gimbal/.vscode/keil_project_properties.json
+gimbal/.vscode/settings.json
