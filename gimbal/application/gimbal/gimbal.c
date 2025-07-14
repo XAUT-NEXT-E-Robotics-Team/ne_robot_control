@@ -29,7 +29,7 @@ Gimbal_Upload_Date_s gimbal_feedback_date;      //define gimbal_update struct ( 
  void GimbalInit()
  {
   //初始化IMU
-  INS_Init();
+  //INS_Init();
   
    //YAW
    Motor_Init_Config_s yaw_config = {

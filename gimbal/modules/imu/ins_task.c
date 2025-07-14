@@ -20,7 +20,7 @@
 #include "general_def.h"
 //#include "master_process.h"
 
-static INS_t INS;
+INS_t INS;
 static IMU_Param_t IMU_Param;
 static PIDInstance TempCtrl = {0};
 

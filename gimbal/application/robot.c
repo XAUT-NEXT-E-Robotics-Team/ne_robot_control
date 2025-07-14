@@ -15,10 +15,11 @@
 void robot_init(void)
 {
     BSPInit();
+    INS_Init();
     //RobotCmdInit();
     RobotOSTaskCreate();
-    GimbalInit();
-    ShootInit();
+    //GimbalInit();
+    //ShootInit();
     LOGINFO("[robot] Robot Init Success");
 }
 
