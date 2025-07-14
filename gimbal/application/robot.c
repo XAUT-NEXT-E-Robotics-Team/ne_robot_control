@@ -10,21 +10,29 @@
  */
 
 #include "robot.h"
-#include "robot_task.h"
 #include "gimbal.h"
+#include "shoot.h"
+#include "robot_task.h"
+
+
+
+
 void robot_init(void)
 {
     BSPInit();
-    RobotCmdInit();
+    INS_Init();
+    //RobotCmdInit();
     RobotOSTaskCreate();
+    //GimbalInit();
+    //ShootInit();
     LOGINFO("[robot] Robot Init Success");
 }
 
 //ROBOT底盘，云台，发射 ，控制任务
 void RobotTask(void)
 {
-    RoBotCmdTask();
-    GimbalTask();
+    //RoBotCmdTask();
+    //GimbalTask();
 }
 
 

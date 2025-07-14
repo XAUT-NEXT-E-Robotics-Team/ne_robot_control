@@ -1,9 +1,19 @@
+/**
+ * @file shoot.c
+ * @author cherishQA
+ * @brief 
+ * @version 0.1
+ * @date 2025-07-9
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
 #include "gimbal.h"
 #include "robot_def.h"          
 #include "dji_motor.h"       
 #include "message_center.h"   //消息中心
 #include "general_def.h"      //tools
-//#include "ins_task.h"  （位姿解算，这个地方需要研究一下）
+#include "ins_task.h"         //姿态解算
 //#include "bmi088.h"     (陀螺仪解算还未添加)
 
 DJIMotorInstance *MOTOR_YAW  , *MOTOR_PITCH  ;  //define two motors (for gimbal run)
@@ -18,6 +28,9 @@ Gimbal_Upload_Date_s gimbal_feedback_date;      //define gimbal_update struct ( 
 
  void GimbalInit()
  {
+  //初始化IMU
+  //INS_Init();
+  
    //YAW
    Motor_Init_Config_s yaw_config = {
        .can_init_config = {

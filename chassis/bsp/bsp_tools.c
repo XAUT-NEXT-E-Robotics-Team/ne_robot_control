@@ -17,7 +17,7 @@ typedef struct
 static uint8_t sig_idx = 0;
 static uint32_t tmp_sig = 1; // tmp_sing << sig_idx从而生成对应信号量
 
-static osThreadId cbkid_list[MX_SIG_LIST_SIZE];
+ osThreadId cbkid_list[MX_SIG_LIST_SIZE];
 static CallbackTask_t cbkinfo_list[MX_SIG_LIST_SIZE];
 
 // 死循环任务,执行cbk函数指针,每次执行完毕后等待sig信号

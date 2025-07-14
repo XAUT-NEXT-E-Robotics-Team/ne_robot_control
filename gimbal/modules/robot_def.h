@@ -5,6 +5,17 @@
 */
 #include "stdint.h"
 
+
+//GIMBAL
+#define MAX_PITCH_ANGLE   15.0f       //pitch up max angle    
+#define MIN_PITCH_ANGLE   -15.0f      //pitch down max angle
+
+//SHOOT
+#define  ONEBULLUTANGLE   15.0f       //拨一发弹丸转的角度
+#define  NUM_PER_CIRCLE   10.0f       //拨盘一圈的弹丸容量
+#define  LOADEMOTOR_JSB   49          //loader电机的减速比
+
+//CHASSIS
 #define CENTER_GIMBAL_OFFSET_X 0.0f   //云台中心偏移x轴
 #define CENTER_GIMBAL_OFFSET_Y 0.0f   //云台中心偏移y轴
 #define RADIUS_WHEEL 60.0f            //轮子半径,单位mm   

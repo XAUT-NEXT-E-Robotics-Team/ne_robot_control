@@ -26,10 +26,14 @@
 #include "robot_cmd.h"
 #include "bsp_init.h"
 #include "motor_task.h"
+#include "ins_task.h"
+#include "shoot.h"
 
+osThreadId IMUTaskHandle;
 osThreadId daemonTaskHandle;
 osThreadId RobotTaskHandle;
 osThreadId motorTaskHandle;
+void StartIMUTask(void const *argument);
 void StartDaemonTask(void const *argument);
 void StartRoBotTask(void const *argument);
 void StartMotorTask(void const *argument);
@@ -39,13 +43,32 @@ void StartMotorTask(void const *argument);
  * 
  */
 void RobotOSTaskCreate(void)
-{
-    osThreadDef(deamon, StartDaemonTask, osPriorityNormal, 0, 128);
+{   
+    osThreadDef(IMU, StartIMUTask, osPriorityRealtime, 0, 256);
+    IMUTaskHandle = osThreadCreate(osThread(IMU), NULL);
+    osThreadDef(deamon, StartDaemonTask, osPriorityBelowNormal, 0, 128);
     daemonTaskHandle = osThreadCreate(osThread(deamon), NULL);
     osThreadDef(Robot,StartRoBotTask,osPriorityNormal,0,1024);
     RobotTaskHandle = osThreadCreate(osThread(Robot),NULL);
-    osThreadDef(motortask,StartMotorTask,osPriorityNormal,0,256);
+    osThreadDef(motortask,StartMotorTask,osPriorityAboveNormal,0,256);
     motorTaskHandle = osThreadCreate(osThread(motortask),NULL);
+}
+
+__attribute__((noreturn)) void StartIMUTask(void const *argument)
+{
+    static float daemon_dt;
+    static float daemon_start;
+    LOGINFO("[freeRTOS] IMU Task Start");
+    for (;;)
+    {
+        // 1000Hz
+        daemon_start = DWT_GetTimeline_ms();
+        INS_Task();
+        daemon_dt = DWT_GetTimeline_ms() - daemon_start;
+        if (daemon_dt > 1)
+            LOGERROR("[freeRTOS] IMU Task is being DELAY! dt = [%f]", &daemon_dt);
+        osDelay(1);
+    }  
 }
 
 
