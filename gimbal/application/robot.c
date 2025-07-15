@@ -32,6 +32,7 @@ void RobotTask(void)
 {
     RoBotCmdTask();
     GimbalTask();
+    ShootTask();
 }
 
 

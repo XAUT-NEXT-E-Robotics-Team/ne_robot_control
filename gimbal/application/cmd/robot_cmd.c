@@ -156,7 +156,7 @@ void RoBotCmdTask(void)
     SubGetMessage(gimbal_cmd_sub,&gimbal_feedback);
     //shoot 暂时不加
 
-
+     CalcOffsetAngle();
     // ROBOTcontrolSet
     RoBotCmdRemoteControlSet();
     // send chassis_cmd

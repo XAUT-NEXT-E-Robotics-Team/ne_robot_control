@@ -103,10 +103,10 @@ void ChassisInit()
  */
 static void MecanumCalculate()
 {
-   chassis_motor1_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(135.0f * DEGREE_2_RAD) + (chassis_vy + chassis_vw*R)* arm_sin_f32(135.0f * DEGREE_2_RAD) ;  
-   chassis_motor2_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(-135.0f * DEGREE_2_RAD) + (chassis_vy + chassis_vw*R)* arm_sin_f32(-135.0f * DEGREE_2_RAD) ;     
-   chassis_motor3_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(-45.0f * DEGREE_2_RAD) + (chassis_vy + chassis_vw*R)* arm_sin_f32(-45.0f * DEGREE_2_RAD) ;  
-   chassis_motor4_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(45.0f * DEGREE_2_RAD) + (chassis_vy + chassis_vw*R)* arm_sin_f32(45.0f * DEGREE_2_RAD) ;  
+   chassis_motor1_speed =  ( (-0.707107f * chassis_vx) + (0.707107f  * chassis_vy) + chassis_vw*R) / 0.071 ;  
+   chassis_motor2_speed =  ( (-0.707107f * chassis_vx) + (-0.707107f * chassis_vy) + chassis_vw*R) / 0.071 ;    
+   chassis_motor3_speed =  ( (0.707107f  * chassis_vx) + (-0.707107f * chassis_vy) + chassis_vw*R) / 0.071 ;
+   chassis_motor4_speed =  ( (0.707107f  * chassis_vx) + (0.707107f  * chassis_vy) + chassis_vw*R) / 0.071 ;
 }
 
 /**
@@ -149,7 +149,7 @@ void ChassisTask()
     chassis_cmd_recv.WZ = 0; // 角速度
     break;
   case chassis_follow:
-     chassis_cmd_recv.WZ =  -1.5f * chassis_cmd_recv.offset_angle * abs(chassis_cmd_recv.offset_angle); // 角速度
+    // chassis_cmd_recv.WZ =  -1.5f * chassis_cmd_recv.offset_angle * abs(chassis_cmd_recv.offset_angle); // 角速度
     break;
   case chassis_ZiZhua:
     chassis_cmd_recv.WZ = 5000; // 角速度
@@ -164,6 +164,7 @@ void ChassisTask()
 //  sin_thete = arm_sin_f32(chassis_cmd_recv.offset_angle * DEGREE_2_RAD);
   chassis_vx = chassis_cmd_recv.VX ; // 前进速度
   chassis_vy = chassis_cmd_recv.VY ; // 横向速度
+  chassis_vw =    chassis_cmd_recv.WZ;
   // 根据控制模式进行正运动学解算,计算底盘输出
   MecanumCalculate();
 

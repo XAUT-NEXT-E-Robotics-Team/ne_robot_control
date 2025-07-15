@@ -49,13 +49,12 @@ void RobotOSTaskCreate(void)
 
 
 __attribute__((noreturn)) void StartDaemonTask(void const *argument)
-{
+{   // 100Hz
     static float daemon_dt;
     static float daemon_start;
     LOGINFO("[freeRTOS] Daemon Task Start");
     for (;;)
     {
-        // 100Hz
         daemon_start = DWT_GetTimeline_ms();
         DaemonTask();
         daemon_dt = DWT_GetTimeline_ms() - daemon_start;
@@ -65,24 +64,25 @@ __attribute__((noreturn)) void StartDaemonTask(void const *argument)
     }  
 }
 
+
 __attribute__((noreturn)) void StartRoBotTask(void const *argument)
-{
- static float RoBot_dt;
- static float RoBot_start;
-LOGINFO("[freeRTOS] RoBot Task Start");
-for(;;){
-        //500Hz
+{    //1000Hz
+    static float RoBot_dt;
+    static float RoBot_start;
+        LOGINFO("[freeRTOS] RoBot Task Start");
+        for(;;){
         RoBot_start = DWT_GetTimeline_ms();
         RobotTask() ;
         RoBot_dt = DWT_GetTimeline_ms() - RoBot_start;
-        if(RoBot_dt>5)
+        if(RoBot_dt>1)
          LOGERROR("[freeRTOS] chassis Task is being DELAY! dt = [%f]",&RoBot_dt);
-         osDelay(5);
+         osDelay(1);
     }
 }
 
+
 __attribute__((noreturn)) void StartMotorTask(void const *argument)
-{
+{   //200HZ
     static float motor_dt;
     static float motor_start;
     LOGINFO("[freeRTOS] MOTOR Task Start");
@@ -93,7 +93,7 @@ __attribute__((noreturn)) void StartMotorTask(void const *argument)
         motor_dt = DWT_GetTimeline_ms() - motor_start;
         if (motor_dt > 1)
             LOGERROR("[freeRTOS] MOTOR Task is being DELAY! dt = [%f]", &motor_dt);
-        osDelay(1);
+        osDelay(5);
     }  
 } 
 

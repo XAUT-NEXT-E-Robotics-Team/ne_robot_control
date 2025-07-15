@@ -12,7 +12,8 @@
 #include "dji_motor.h"       
 #include "message_center.h"   //消息中心
 #include "general_def.h"      //tools
-#include "robot_def.h"    
+#include "robot_def.h"
+    
 //#include "ins_task.h"         //姿态解算
      
 
