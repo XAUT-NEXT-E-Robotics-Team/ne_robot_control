@@ -4,23 +4,25 @@
 *@ 此部分云台底盘都使用
 */
 #include "stdint.h"
-
+#include "ins_task.h"
 
 //GIMBAL
-#define MAX_PITCH_ANGLE   15.0f       //pitch up max angle    
-#define MIN_PITCH_ANGLE   -15.0f      //pitch down max angle
-
+#define PITCH_MAX    15.0f        //云台向上最大角度
+#define PITCH_MIN    -15.0f       //云台向下最大角度 
+#define YAW_CHASSIS_ANGLE_ECD   2435   //根据具体云台和底盘对齐时的YAW轴的电机的ECD
+#define PITCH_HORIZON_ECD    3000
+        
 //SHOOT
-#define  ONEBULLUTANGLE   15.0f       //拨一发弹丸转的角度
-#define  NUM_PER_CIRCLE   10.0f       //拨盘一圈的弹丸容量
-#define  LOADEMOTOR_JSB   49          //loader电机的减速比
+#define ONEBULLUTANGLE     15.0f  //一颗弹丸所占的角度
+#define LOADEMOTOR_JSB     (36*2.5)     //减速比（电机加拨盘设计[后者问问机械]）
+#define NUM_PER_CIRCLE     10     //拨盘一圈弹丸数量
 
 //CHASSIS
 #define CENTER_GIMBAL_OFFSET_X 0.0f   //云台中心偏移x轴
 #define CENTER_GIMBAL_OFFSET_Y 0.0f   //云台中心偏移y轴
 #define RADIUS_WHEEL 60.0f            //轮子半径,单位mm   
 #define REDUCTION_WHEEL 19.0f         //轮子减速比
-#define R        270.0f               //半径  mm
+#define R        0.3f               //半径  m
 
 #pragma pack(1) 
 //机器人状态
@@ -151,7 +153,7 @@ Enemy_color_e Enemy_color ;//敌人的颜色  1 为RED   2为BLUE
 
 typedef struct 
 {
-  //atitude_t gimbal_imu_date ; (waiting for imu part)
+  attitude_t gimbal_imu_date ;
   uint16_t yaw_motor_single_round_angle;
 }Gimbal_Upload_Date_s;
 

@@ -23,8 +23,8 @@ FSI6Data_t fsi6Data;
 #define RC_FRAME_NUM     25u
 
 //串口&守护进程实例
-static USARTInstance *rc_usart_instance;
-static DaemonInstance *rc_daemon_instance;
+ USARTInstance *rc_usart_instance;
+ DaemonInstance *rc_daemon_instance;
 
 /**
  * @brief FSI6遥控器数据解析函数
@@ -45,7 +45,7 @@ static void GetFSI6Data(uint8_t *buf)
     fsi6Data.V1_L = ((uint16_t)buf[12] >> 0 | ((uint16_t)buf[13] << 8 )) & 0x07FF;
     fsi6Data.V2_R = ((uint16_t)buf[13] >> 3 | ((uint16_t)buf[14] << 5 )) & 0x07FF;
     fsi6Data.FSI6_Flag = buf[23];
-    fsi6Data.FSI6_End = buf[24];
+    fsi6Data.FSI6_End = buf[24]; 
 }
 
 /**

@@ -29,15 +29,15 @@ void ShootInit()
   //frileftmotor frurightmotor  
   Motor_Init_Config_s  frictionmotor_config = {
    .can_init_config = {
-    .can_handle = &hcan1 ,
+    .can_handle = &hcan2 ,
    } ,
    .controller_param_init_config = {
     .speed_PID = {
-        .Kp = 1.0 ,
-        .Ki = 0.0 ,
-        .Kd = 0.0 ,
-        .IntegralLimit = 1000 ,
-        .MaxOut = 16850 ,
+        .Kp = 20.0f ,
+        .Ki = 0.00f ,
+        .Kd = 40.0f ,
+        .IntegralLimit = 1000.0f ,
+        .MaxOut = 16384.0f ,
         .Improve = (PID_Improvement_e)(PID_Trapezoid_Intergral|PID_Integral_Limit|PID_Derivative_On_Measurement),
     },
    },
@@ -60,23 +60,23 @@ frirightmotor = DJIMotorInit(&frictionmotor_config);
   Motor_Init_Config_s loadermotor_config ={
     .can_init_config = {
         .can_handle = &hcan1 ,
-        .tx_id = 4 ,
+        .tx_id = 3 ,
     },                                //seting can inital
     .controller_param_init_config = {
         .speed_PID = {
-            .Kp = 1.0 ,
-            .Ki = 0.0 ,
-            .Kd = 0.0 ,
-            .IntegralLimit = 1000 ,
-            .MaxOut = 13680 ,
+            .Kp = 10.0f ,
+            .Ki = 0.000f ,
+            .Kd = 0.0f ,
+            .IntegralLimit = 1000.0f ,
+            .MaxOut = 13000.0f ,
             .Improve = (PID_Improvement_e)(PID_Trapezoid_Intergral|PID_Integral_Limit|PID_Derivative_On_Measurement),
         },
         .angle_PID = {
-            .Kp = 1.0 ,
-            .Ki = 0.0 ,
-            .Kd = 0.0 ,
-            .IntegralLimit = 1000 ,
-            .MaxOut = 13680 ,
+            .Kp = 0.3f ,
+            .Ki = 0.00f ,
+            .Kd = 0.0f ,
+            .IntegralLimit = 2000.0f ,
+            .MaxOut = 15000.0f ,
             .Improve = (PID_Improvement_e)(PID_Trapezoid_Intergral|PID_Integral_Limit|PID_Derivative_On_Measurement),
         },      
     },

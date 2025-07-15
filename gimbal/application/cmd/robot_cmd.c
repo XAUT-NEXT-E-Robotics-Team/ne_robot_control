@@ -14,7 +14,7 @@
 #include "message_center.h"
 // module
 #include "remote_control.h"
-
+#include "dji_motor.h"
 // bsp
 #include "bsp_dwt.h"
 #include "bsp_log.h"
@@ -22,6 +22,9 @@
 //双机通信
 #include "can_comm.h"
 CANCommInstance *cmd_can_comm ;
+
+#define YAW_ALING_ANGLE        (YAW_CHASSIS_ANGLE_ECD * ECD_ANGLE_COEF_DJI)   //对齐时的yaw角度  （0~360）
+#define PITCH_HORIZON_ANGLE    (PITCH_HORIZON_ECD * ECD_ANGLE_COEF_DJI)    //对齐时的pitch角度  （0~360）
 
 //FSI6
 float STICK_TO_SPEED_CHASSIS = 0.25f; // 摇杆到速度的比例系数(CHASSIS)
@@ -49,7 +52,6 @@ Shoot_Ctrol_Cmd_s shoot_cmd_send ; //发射控制指令的结构体
 Robot_Status_e robot_state;          
 
 
-
 void RobotCmdInit(void)
 {
     fs16data = FSI6RemoteControlInit(&huart3);
@@ -72,6 +74,29 @@ void RobotCmdInit(void)
 
     robot_state = ROBOT_READY; // robot进入准备状态
 }
+
+/**
+ * @brief 根据gimbal app传回的当前电机角度计算和零位的误差
+ *        单圈绝对角度的范围是0~360,说明文档中有图示
+ *
+ */
+static void CalcOffsetAngle ()
+{
+  float angle = gimbal_feedback.yaw_motor_single_round_angle ;
+  if(angle > YAW_ALING_ANGLE && angle <= 180.f + YAW_ALING_ANGLE)
+  {
+   chassis_cmd_send.offset_angle = angle - YAW_ALING_ANGLE ;
+  }
+  else if (angle > 180.f + YAW_ALING_ANGLE )
+  {
+   chassis_cmd_send.offset_angle = angle - YAW_ALING_ANGLE - 360.0f ;
+  }
+  else 
+  {
+   chassis_cmd_send.offset_angle = angle - YAW_ALING_ANGLE ;  
+  }
+}
+
 
 /**
  * @brief 控制输入为遥控器(调试时)的模式和控制量设置
@@ -117,10 +142,10 @@ static void RoBotCmdRemoteControlSet(void)
     }
 
    //传入遥控参量
-     chassis_cmd_send.VX = STICK_TO_SPEED_CHASSIS * (fs16data->L_UD); // 前后平移
-     chassis_cmd_send.VY = STICK_TO_SPEED_CHASSIS * (fs16data->L_LR); // 左右平移
+     chassis_cmd_send.VX = STICK_TO_SPEED_CHASSIS * (fs16data->L_UD);   // 前后平移
+     chassis_cmd_send.VY = STICK_TO_SPEED_CHASSIS * (fs16data->L_LR);   // 左右平移
      gimbal_cmd_send.pitch = STICK_TO_SPEED_GIMBAL * (fs16data->R_UD) ; //上下移动
-     gimbal_cmd_send.yaw = STICK_TO_SPEED_GIMBAL * (fs16data->R_LR) ; //左右平移
+     gimbal_cmd_send.yaw = STICK_TO_SPEED_GIMBAL * (fs16data->R_LR) ;   //左右平移
 }
 
 /* ROBOT核心控制任务,200Hz频率运行(必须高于视觉发送频率) */

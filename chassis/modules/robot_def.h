@@ -17,10 +17,12 @@
 //GIMBAL
 #define PITCH_MAX    15.0f        //云台向上最大角度
 #define PITCH_MIN    -15.0f       //云台向下最大角度 
-
+#define YAW_CHASSIS_ANGLE_ECD   2435   //根据具体云台和底盘对齐时的YAW轴的电机的ECD
+#define PITCH_HORIZON_ECD    3000
+        
 //SHOOT
 #define ONEBULLUTANGLE     15.0f  //一颗弹丸所占的角度
-#define LOADEMOTOR_JSB     36     //减速比（电机加拨盘设计[后者问问机械]）
+#define LOADEMOTOR_JSB     (36*2.5)     //减速比（电机加拨盘设计[后者问问机械]）
 #define NUM_PER_CIRCLE     10     //拨盘一圈弹丸数量
 
 //CHASSIS
@@ -28,7 +30,7 @@
 #define CENTER_GIMBAL_OFFSET_Y 0.0f   //云台中心偏移y轴
 #define RADIUS_WHEEL 60.0f            //轮子半径,单位mm   
 #define REDUCTION_WHEEL 19.0f         //轮子减速比
-#define R        270.0f               //半径  mm
+#define R        0.3f               //半径  m
 
 
 
@@ -161,7 +163,7 @@ Enemy_color_e Enemy_color ;//敌人的颜色  1 为RED   2为BLUE
 
 typedef struct 
 {
-  //atitude_t gimbal_imu_date ; (waiting for imu part)
+  //atitude_t gimbal_imu_date ; 
   uint16_t yaw_motor_single_round_angle;
 }Gimbal_Upload_Date_s;
 

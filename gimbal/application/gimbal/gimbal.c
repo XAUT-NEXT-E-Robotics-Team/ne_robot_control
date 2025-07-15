@@ -9,12 +9,14 @@
  * 
  */
 #include "gimbal.h"
-#include "robot_def.h"          
 #include "dji_motor.h"       
 #include "message_center.h"   //消息中心
 #include "general_def.h"      //tools
-#include "ins_task.h"         //姿态解算
-//#include "bmi088.h"     (陀螺仪解算还未添加)
+#include "robot_def.h"    
+//#include "ins_task.h"         //姿态解算
+     
+
+attitude_t *gimba_IMU_date ;  //云台IMU数据
 
 DJIMotorInstance *MOTOR_YAW  , *MOTOR_PITCH  ;  //define two motors (for gimbal run)
 Publisher_t *gimbal_pub ;                       //define gimbal publisher (for send date)  
@@ -23,41 +25,39 @@ Subscriber_t *gimbal_sub ;                      //define gimbal subscriber (for 
 Gimbal_Ctrol_Cmd_s  gimbal_cmd_recv;            //define gimbal_cmd_control  struct (for recive controldate from CMD)
 Gimbal_Upload_Date_s gimbal_feedback_date;      //define gimbal_update struct ( gimbal motor feedback dates 回传给 CMD)
 
-//双机通信
-//CANInstance *gimbal_can_comm ;
 
  void GimbalInit()
  {
-  //初始化IMU
-   INS_Init();
+   //初始化IMU
+   gimba_IMU_date = INS_Init(); //IMU初始化，获取姿态数据指针赋值给yaw电机
   
    //YAW
    Motor_Init_Config_s yaw_config = {
        .can_init_config = {
        .can_handle = &hcan1,
-       .tx_id = 1 ,           //send ID
+       .tx_id = 7 ,           //send ID
       },
       .controller_param_init_config = {
       .angle_PID = {
-        .Kp = 1.0,
-        .Ki = 0.0,
-        .Kd = 0.0,
-        .IntegralLimit = 1000,   //积分限幅
-        .MaxOut = 16380 ,        //输出限幅
-        //.DeadBand = 0.1 ,         //死区
+        .Kp = 0.11f,
+        .Ki = 0.00f,
+        .Kd = 0.5f,
+        .IntegralLimit = 2.0f,  //积分限幅
+        .MaxOut = 6.0f ,        //输出限幅
+        .DeadBand = 0.1 ,       //死区
         .Improve = (PID_Improvement_e)(PID_Trapezoid_Intergral|PID_Integral_Limit|PID_Derivative_On_Measurement), //梯形积分|积分限幅|对测量值计算比例项
       },
       .speed_PID = {
-        .Kp = 10.0,
-        .Ki = 0.0,
-        .Kd = 0.0,
-        .IntegralLimit = 1000,  //
-        .MaxOut = 16380,
+        .Kp = 24000.0f,
+        .Ki = 0.25f,
+        .Kd = 0.0f,
+        .IntegralLimit = 2000.0f,  //
+        .MaxOut = 15000.0f,
         .Improve = (PID_Improvement_e)(PID_Trapezoid_Intergral|PID_Integral_Limit|PID_Derivative_On_Measurement), //梯形积分|积分限幅|对测量值计算比例项
       },
-     //其他的反馈值   (waiting for IMU)   
-     // .other_speed_feedback_ptr = &gimbal_IMU_date->Yaw;
-     // .other_angel_feedback_ptr
+			.other_angle_feedback_ptr = &gimba_IMU_date->YawTotalAngle, 
+     //其他的反馈值     
+      .other_speed_feedback_ptr = &gimba_IMU_date->Gyro[2],
        },
       .controller_setting_init_config = {
         .angle_feedback_source = OTHER_FEED ,        // MOTOR_FEED|OTHER_FEED :使用后者需要指定数据来源
@@ -69,29 +69,31 @@ Gimbal_Upload_Date_s gimbal_feedback_date;      //define gimbal_update struct ( 
     //PITCH
     Motor_Init_Config_s pitch_config = {
        .can_init_config = {
-        .can_handle = &hcan2 , //can_handle_type
-        .tx_id = 2 ,       //send ID
+        .can_handle = &hcan1 , //can_handle_type
+        .tx_id = 6 ,       //send ID
        },
        .controller_param_init_config ={
         .angle_PID = {
-          .Kp = 1.0 , 
-          .Ki = 0.0 ,
-          .Kd = 0.0 ,
-          .IntegralLimit = 1000 ,
-          .MaxOut = 16380 ,
+          .Kp = 1.0f , 
+          .Ki = 0.01f ,
+          .Kd = 1.0f ,
+          .IntegralLimit = 3.0f ,
+          .MaxOut = 8.0f ,
           .Improve = (PID_Improvement_e)(PID_Trapezoid_Intergral|PID_Integral_Limit|PID_Derivative_On_Measurement), //梯形积分|积分限幅|对测量值计算比例项
         },
         .speed_PID = {
-          .Kp = 1.0 ,
-          .Ki = 0.0,
-          .Kd = 0.0,
-          .IntegralLimit = 1000 ,
-          .MaxOut = 16350 ,
+          .Kp = 7000.0f ,
+          .Ki = 10.0f ,
+          .Kd = 0.0f ,
+          .IntegralLimit = 5000.0f ,
+          .MaxOut = 15000.0f ,
           .Improve = (PID_Improvement_e)(PID_Trapezoid_Intergral|PID_Integral_Limit|PID_Derivative_On_Measurement), //梯形积分|积分限幅|对测量值计算比例项
         },
-       //其他的反馈值   (waiting for IMU)   
-       // .other_speed_feedback_ptr = &gimbal_IMU_date->Yaw;
-       // .other_angel_feedback_ptr =  ;
+       //其他的反馈值     
+        .other_angle_feedback_ptr = &gimba_IMU_date->Pitch ,
+
+        .other_speed_feedback_ptr = &gimba_IMU_date->Gyro[0] ,
+
        },
        .controller_setting_init_config = {
         .angle_feedback_source = OTHER_FEED ,
@@ -140,9 +142,9 @@ void GimbalTask()
   }
   
    
-  // 设置反馈数据,主要是imu和yaw的ecd  （waiting for imu）
-  //  gimbal_feedback_data.gimbal_imu_data = *gimba_IMU_data;
-  //  gimbal_feedback_data.yaw_motor_single_round_angle = yaw_motor->measure.angle_single_round;
+  // 设置反馈数据,主要是imu和yaw的ecd  
+    gimbal_feedback_date.gimbal_imu_date =  *gimba_IMU_date;
+    gimbal_feedback_date.yaw_motor_single_round_angle = MOTOR_YAW->measure.angle_single_round;
 
 
  //gimbal publisher  send  feedback date

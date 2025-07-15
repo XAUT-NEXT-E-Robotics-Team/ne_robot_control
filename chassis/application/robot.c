@@ -15,6 +15,7 @@ void robot_init(void)
 {
     BSPInit();
     RobotOSTaskCreate();
+    ChassisInit();
     LOGINFO("[robot] Robot Init Success");
 }
 

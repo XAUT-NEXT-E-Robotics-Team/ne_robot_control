@@ -1,13 +1,13 @@
 /**
  * @file chassis.c
- * @author NeoZeng neozng1@hnu.edu.cn
+ * @author cherishQA
  * @brief 底盘应用,负责接收robot_cmd的控制命令并根据命令进行运动学解算,得到输出
  *        注意底盘采取右手系,对于平面视图,底盘纵向运动的正前方为x正方向;横向运动的右侧为y正方向
  *
  * @version 0.1
- * @date 2022-12-04
+ * @date 2025-7-14
  *
- * @copyright Copyright (c) 2022
+ * @copyright Copyright (c) 2025
  *
  */
 
@@ -58,31 +58,30 @@ void ChassisInit()
       .can_init_config.can_handle = &hcan2,
       .controller_param_init_config = {
           .speed_PID = {
-              .Kd = 0.001f,
-              .Ki = 0.05f,
               .Kp = 5.0f, 
-              .IntegralLimit = 1000.0f,
+              .Kd = 0.1f,
+              .Ki = 0.1f,
+              .IntegralLimit = 10000.0f,
               .Improve = (PID_Improvement_e)(PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement),
-              .MaxOut = 16384.0f,
+              .MaxOut = 16000.0f,
           },
       },
       .controller_setting_init_config = {
           .speed_feedback_source = MOTOR_FEED,
-          .outer_loop_type = SPEED_LOOP,
           .close_loop_type = SPEED_LOOP,
       },
       .motor_type = M3508, // 电机类型
   };
-  chassis_motor_config.can_init_config.tx_id = 1; // 电机1的发送ID
+  chassis_motor_config.can_init_config.tx_id = 3; // 电机1的发送ID
   MOTOR1 = DJIMotorInit(&chassis_motor_config);   // 电机1实例化
 
-  chassis_motor_config.can_init_config.tx_id = 3; // 电机2的发送ID
+  chassis_motor_config.can_init_config.tx_id = 4; // 电机2的发送ID
   MOTOR2 = DJIMotorInit(&chassis_motor_config);   // 电机2实例化
 
-  chassis_motor_config.can_init_config.tx_id = 2; // 电机3的发送ID
+  chassis_motor_config.can_init_config.tx_id = 1; // 电机3的发送ID
   MOTOR3 = DJIMotorInit(&chassis_motor_config);   // 电机3实例化
 
-  chassis_motor_config.can_init_config.tx_id = 4; // 电机4的发送ID
+  chassis_motor_config.can_init_config.tx_id = 2; // 电机4的发送ID
   MOTOR4 = DJIMotorInit(&chassis_motor_config);   // 电机4实例化
 
   //双机通信CAN_comm初始化
@@ -104,10 +103,10 @@ void ChassisInit()
  */
 static void MecanumCalculate()
 {
-   chassis_motor1_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(135.0f) + (chassis_vy + chassis_vw*R)* arm_sin_f32(135.0f) ;  
-   chassis_motor2_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(-135.0f) + (chassis_vy + chassis_vw*R)* arm_sin_f32(-135.0f) ;     
-   chassis_motor3_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(-45.0f) + (chassis_vy + chassis_vw*R)* arm_sin_f32(-45.0f) ;  
-   chassis_motor4_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(45.0f) + (chassis_vy + chassis_vw*R)* arm_sin_f32(45.0f) ;  
+   chassis_motor1_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(135.0f * DEGREE_2_RAD) + (chassis_vy + chassis_vw*R)* arm_sin_f32(135.0f * DEGREE_2_RAD) ;  
+   chassis_motor2_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(-135.0f * DEGREE_2_RAD) + (chassis_vy + chassis_vw*R)* arm_sin_f32(-135.0f * DEGREE_2_RAD) ;     
+   chassis_motor3_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(-45.0f * DEGREE_2_RAD) + (chassis_vy + chassis_vw*R)* arm_sin_f32(-45.0f * DEGREE_2_RAD) ;  
+   chassis_motor4_speed =  (chassis_vx-chassis_vw*R)* arm_cos_f32(45.0f * DEGREE_2_RAD) + (chassis_vy + chassis_vw*R)* arm_sin_f32(45.0f * DEGREE_2_RAD) ;  
 }
 
 /**
@@ -147,25 +146,30 @@ void ChassisTask()
   switch (chassis_cmd_recv.chassis_mode)
   {
   case chassis_unfollow:
-    chassis_vw = 0; // 角速度
+    chassis_cmd_recv.WZ = 0; // 角速度
     break;
   case chassis_follow:
-    chassis_vw = chassis_cmd_recv.WZ; // 角速度
+     chassis_cmd_recv.WZ =  -1.5f * chassis_cmd_recv.offset_angle * abs(chassis_cmd_recv.offset_angle); // 角速度
     break;
   case chassis_ZiZhua:
-    chassis_vw = chassis_cmd_recv.WZ; // 角速度
+    chassis_cmd_recv.WZ = 5000; // 角速度
     // ZiZhuan_t += DWT_GetTimeDiff() / 1000.0
     break; // 小陀螺模式
   default:
     break; // 其他情况
   }
-  chassis_vx = chassis_cmd_recv.VX; // 前进速度
-  chassis_vy = chassis_cmd_recv.VY; // 横向速度
+
+//  static sin_thete ,cos_thete ;
+//  cos_thete = arm_cos_f32(chassis_cmd_recv.offset_angle * DEGREE_2_RAD);
+//  sin_thete = arm_sin_f32(chassis_cmd_recv.offset_angle * DEGREE_2_RAD);
+  chassis_vx = chassis_cmd_recv.VX ; // 前进速度
+  chassis_vy = chassis_cmd_recv.VY ; // 横向速度
   // 根据控制模式进行正运动学解算,计算底盘输出
   MecanumCalculate();
 
   // 根据裁判系统的反馈数据和电容数据对输出限幅并设定闭环参考值
   LimitChassisOutput();
   // 反馈数据给上板
+	//chassis_feedback_date.shoot_Speed=100.0f;
   CANCommSend(chassis_can_comm,(void *)&chassis_feedback_date);
 }
