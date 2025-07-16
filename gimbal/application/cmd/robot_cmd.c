@@ -13,6 +13,7 @@
 #include "robot_def.h"
 #include "message_center.h"
 // module
+
 #include "remote_control.h"
 #include "dji_motor.h"
 // bsp
@@ -27,8 +28,8 @@ CANCommInstance *cmd_can_comm ;
 #define PITCH_HORIZON_ANGLE    (PITCH_HORIZON_ECD * ECD_ANGLE_COEF_DJI)    //对齐时的pitch角度  （0~360）
 
 //FSI6
-float STICK_TO_SPEED_CHASSIS = 0.25f; // 摇杆到速度的比例系数(CHASSIS)
-float STICK_TO_SPEED_GIMBAL =  0.01; // 摇杆到速度的比例系数(GIMBAL)
+float STICK_TO_SPEED_CHASSIS = 0.5f; // 摇杆到速度的比例系数(CHASSIS)
+float STICK_TO_SPEED_GIMBAL =  0.01f; // 摇杆到速度的比例系数(GIMBAL)
 FSI6Data_t *fs16data;
 
 //CHASSIS_CMD
@@ -57,7 +58,10 @@ void RobotCmdInit(void)
     fs16data = FSI6RemoteControlInit(&huart3);
     
     gimbal_cmd_pub = PubRegister("gimbal_cmd", sizeof(Gimbal_Ctrol_Cmd_s)); //gimbal cmd control publisher register
-    gimbal_cmd_sub = SubRegister("gimbal_feed", sizeof(Gimbal_Upload_Date_s)); //gimbal feedback date subscriber register 
+    gimbal_cmd_sub = SubRegister("gimbal_feed", sizeof(Gimbal_Upload_Date_s)); //gimbal feedback date subscriber register
+    //失能的时候设置使能实的初始角度	
+	  gimbal_cmd_send.pitch = 0.0f ;
+    gimbal_cmd_send.yaw = 0.0f ; 
     
     shoot_cmd_pub = PubRegister("shoot_cmd", sizeof(Shoot_Ctrol_Cmd_s)); //shoot cmd control publisher register
 
@@ -110,7 +114,7 @@ static void RoBotCmdRemoteControlSet(void)
     {   
          // disable all robot
         chassis_cmd_send.chassis_mode = chassis_stop ;
-        gimbal_cmd_send.gimbal_mode = GIMBAL_STOP ; 
+        gimbal_cmd_send.gimbal_mode = GIMBAL_STOP ;   
     }
     else if (fs16data->SC_CH7 == RC_SW_MID)
     {   //enable all robot (follow mode)
@@ -141,11 +145,31 @@ static void RoBotCmdRemoteControlSet(void)
       }
     }
 
+   //chassis建立死区
+   fs16data->L_LR = fabsf(fs16data->L_LR) < 50 ? 0 : fs16data->L_LR ;   //绝对值是否小于50 ，是取0 ，否取通道值本身
+   fs16data->L_UD = fabsf(fs16data->L_UD) < 50 ? 0 : fs16data->L_UD ; 
    //传入遥控参量
-     chassis_cmd_send.VX = STICK_TO_SPEED_CHASSIS * (fs16data->L_UD);   // 前后平移
-     chassis_cmd_send.VY = STICK_TO_SPEED_CHASSIS * (fs16data->L_LR);   // 左右平移
-     gimbal_cmd_send.pitch = STICK_TO_SPEED_GIMBAL * (fs16data->R_UD) ; //上下移动
-     gimbal_cmd_send.yaw = STICK_TO_SPEED_GIMBAL * (fs16data->R_LR) ;   //左右平移
+   chassis_cmd_send.VX = STICK_TO_SPEED_CHASSIS * (fs16data->L_UD);   // 前后平移
+   chassis_cmd_send.VY = STICK_TO_SPEED_CHASSIS * (fs16data->L_LR);   // 左右平移
+   //gimbal建立死区
+   //pitch
+   if( fs16data->R_UD > 50  )
+   {
+     gimbal_cmd_send.pitch += 0.5 ;     
+   }
+   else if ( fs16data->R_UD < -50)
+   {
+     gimbal_cmd_send.pitch -= 0.5 ;
+   }
+   //yaw
+   if( fs16data->R_LR > 50 )
+   {
+     gimbal_cmd_send.yaw += 0.5 ;
+   }
+   else if ( fs16data->R_LR < -50)
+   {
+     gimbal_cmd_send.yaw -= 0.5 ;
+   }
 }
 
 /* ROBOT核心控制任务,200Hz频率运行(必须高于视觉发送频率) */
@@ -156,6 +180,7 @@ void RoBotCmdTask(void)
     SubGetMessage(gimbal_cmd_sub,&gimbal_feedback);
     //shoot 暂时不加
 
+    //计算对齐时的需要的WZ映射的速度
      CalcOffsetAngle();
     // ROBOTcontrolSet
     RoBotCmdRemoteControlSet();

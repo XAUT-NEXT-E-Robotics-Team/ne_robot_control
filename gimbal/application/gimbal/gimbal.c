@@ -13,8 +13,7 @@
 #include "message_center.h"   //消息中心
 #include "general_def.h"      //tools
 #include "robot_def.h"
-    
-//#include "ins_task.h"         //姿态解算
+#include "ins_task.h"         //姿态解算
      
 
 attitude_t *gimba_IMU_date ;  //云台IMU数据
@@ -62,7 +61,8 @@ Gimbal_Upload_Date_s gimbal_feedback_date;      //define gimbal_update struct ( 
        },
       .controller_setting_init_config = {
         .angle_feedback_source = OTHER_FEED ,        // MOTOR_FEED|OTHER_FEED :使用后者需要指定数据来源
-        .speed_feedback_source = MOTOR_FEED ,         //(暂时先用电机的反馈值) speed 可先用DJI电机来源 ，角度选择BMI088
+        .speed_feedback_source = OTHER_FEED ,         //(暂时先用电机的反馈值) speed 可先用DJI电机来源 ，角度选择BMI088
+        .outer_loop_type = ANGLE_LOOP ,
         .close_loop_type =(Closeloop_Type_e)(ANGLE_LOOP | SPEED_LOOP) , //速度环与角度环 
         .motor_reverse_flag = MOTOR_DIRECTION_NORMAL , //电机正反转标志
          },
@@ -92,13 +92,13 @@ Gimbal_Upload_Date_s gimbal_feedback_date;      //define gimbal_update struct ( 
         },
        //其他的反馈值     
         .other_angle_feedback_ptr = &gimba_IMU_date->Pitch ,
-
         .other_speed_feedback_ptr = &gimba_IMU_date->Gyro[0] ,
 
        },
        .controller_setting_init_config = {
         .angle_feedback_source = OTHER_FEED ,
-        .speed_feedback_source = MOTOR_FEED ,
+        .speed_feedback_source = OTHER_FEED ,
+        .outer_loop_type = ANGLE_LOOP ,
         .close_loop_type = (Closeloop_Type_e)(ANGLE_LOOP | SPEED_LOOP) ,
         .motor_reverse_flag = MOTOR_DIRECTION_NORMAL ,
        },
@@ -144,11 +144,11 @@ void GimbalTask()
   
    
   // 设置反馈数据,主要是imu和yaw的ecd  
-    gimbal_feedback_date.gimbal_imu_date =  *gimba_IMU_date;
-    gimbal_feedback_date.yaw_motor_single_round_angle = MOTOR_YAW->measure.angle_single_round;
+  gimbal_feedback_date.gimbal_imu_date =  *gimba_IMU_date;
+  gimbal_feedback_date.yaw_motor_single_round_angle = MOTOR_YAW->measure.angle_single_round;
 
 
- //gimbal publisher  send  feedback date
- PubPushMessage(gimbal_pub,(void *)&gimbal_feedback_date);
+  //gimbal publisher  send  feedback date
+  PubPushMessage(gimbal_pub,(void *)&gimbal_feedback_date);
 
 }

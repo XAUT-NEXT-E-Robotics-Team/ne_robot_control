@@ -95,7 +95,7 @@ __attribute__((noreturn)) void StartRoBotTask(void const *argument)
   float RoBot_start;
 LOGINFO("[freeRTOS] RoBot Task Start");
 for(;;){
-        //500Hz
+        //1000Hz
         RoBot_start = DWT_GetTimeline_ms();
         RobotTask() ;
         RoBot_dt = DWT_GetTimeline_ms() - RoBot_start;
@@ -111,7 +111,7 @@ __attribute__((noreturn)) void StartMotorTask(void const *argument)
      float motor_start;
     LOGINFO("[freeRTOS] MOTOR Task Start");
     for (;;)
-    {
+    {   //500HZ
         motor_start = DWT_GetTimeline_ms();
         MotorControlTask();
         motor_dt = DWT_GetTimeline_ms() - motor_start;

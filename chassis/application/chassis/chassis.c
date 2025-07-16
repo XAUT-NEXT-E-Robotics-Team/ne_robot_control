@@ -68,6 +68,7 @@ void ChassisInit()
       },
       .controller_setting_init_config = {
           .speed_feedback_source = MOTOR_FEED,
+          .outer_loop_type = SPEED_LOOP,
           .close_loop_type = SPEED_LOOP,
       },
       .motor_type = M3508, // 电机类型
@@ -103,10 +104,10 @@ void ChassisInit()
  */
 static void MecanumCalculate()
 {
-   chassis_motor1_speed =  ( (-0.707107f * chassis_vx) + (0.707107f  * chassis_vy) + chassis_vw*R) / 0.071 ;  
-   chassis_motor2_speed =  ( (-0.707107f * chassis_vx) + (-0.707107f * chassis_vy) + chassis_vw*R) / 0.071 ;    
-   chassis_motor3_speed =  ( (0.707107f  * chassis_vx) + (-0.707107f * chassis_vy) + chassis_vw*R) / 0.071 ;
-   chassis_motor4_speed =  ( (0.707107f  * chassis_vx) + (0.707107f  * chassis_vy) + chassis_vw*R) / 0.071 ;
+   chassis_motor1_speed =  ( (-0.707107f * chassis_vx) + (0.707107f  * chassis_vy) + chassis_vw*R) *14.08 ;  
+   chassis_motor2_speed =  ( (-0.707107f * chassis_vx) + (-0.707107f * chassis_vy) + chassis_vw*R) *14.08 ;    
+   chassis_motor3_speed =  ( (0.707107f  * chassis_vx) + (-0.707107f * chassis_vy) + chassis_vw*R) *14.08 ;
+   chassis_motor4_speed =  ( (0.707107f  * chassis_vx) + (0.707107f  * chassis_vy) + chassis_vw*R) *14.08 ;
 }
 
 /**
@@ -149,11 +150,10 @@ void ChassisTask()
     chassis_cmd_recv.WZ = 0; // 角速度
     break;
   case chassis_follow:
-    // chassis_cmd_recv.WZ =  -1.5f * chassis_cmd_recv.offset_angle * abs(chassis_cmd_recv.offset_angle); // 角速度
+     chassis_cmd_recv.WZ =  -1.5f * chassis_cmd_recv.offset_angle * abs(chassis_cmd_recv.offset_angle); // 角速度
     break;
   case chassis_ZiZhua:
     chassis_cmd_recv.WZ = 5000; // 角速度
-    // ZiZhuan_t += DWT_GetTimeDiff() / 1000.0
     break; // 小陀螺模式
   default:
     break; // 其他情况
@@ -164,7 +164,7 @@ void ChassisTask()
 //  sin_thete = arm_sin_f32(chassis_cmd_recv.offset_angle * DEGREE_2_RAD);
   chassis_vx = chassis_cmd_recv.VX ; // 前进速度
   chassis_vy = chassis_cmd_recv.VY ; // 横向速度
-  chassis_vw =    chassis_cmd_recv.WZ;
+//  chassis_vw =    chassis_cmd_recv.WZ;
   // 根据控制模式进行正运动学解算,计算底盘输出
   MecanumCalculate();
 

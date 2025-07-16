@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "robot_task.h": "c"
+        "robot_task.h": "c",
+        "dji_motor.h": "c",
+        "controller.h": "c"
     }
 }
