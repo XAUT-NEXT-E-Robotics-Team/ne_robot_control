@@ -58,10 +58,10 @@ void ChassisInit()
       .can_init_config.can_handle = &hcan2,
       .controller_param_init_config = {
           .speed_PID = {
-              .Kp = 5.0f, 
-              .Kd = 0.1f,
-              .Ki = 0.1f,
-              .IntegralLimit = 10000.0f,
+              .Kp = 5.1f, 
+              .Kd = 0.005f,
+              .Ki = 0.2f,
+              .IntegralLimit = 1000.0f,
               .Improve = (PID_Improvement_e)(PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement),
               .MaxOut = 16000.0f,
           },
@@ -104,10 +104,10 @@ void ChassisInit()
  */
 static void MecanumCalculate()
 {
-   chassis_motor1_speed =  ( (-0.707107f * chassis_vx) + (0.707107f  * chassis_vy) + chassis_vw*R) *14.08 ;  
-   chassis_motor2_speed =  ( (-0.707107f * chassis_vx) + (-0.707107f * chassis_vy) + chassis_vw*R) *14.08 ;    
-   chassis_motor3_speed =  ( (0.707107f  * chassis_vx) + (-0.707107f * chassis_vy) + chassis_vw*R) *14.08 ;
-   chassis_motor4_speed =  ( (0.707107f  * chassis_vx) + (0.707107f  * chassis_vy) + chassis_vw*R) *14.08 ;
+   chassis_motor1_speed =  ( (-0.707107f * chassis_vx) + (0.707107f  * chassis_vy) + chassis_vw*R) *1266.0f ;  
+   chassis_motor2_speed =  ( (-0.707107f * chassis_vx) + (-0.707107f * chassis_vy) + chassis_vw*R) *1266.0f ;    
+   chassis_motor3_speed =  ( (0.707107f  * chassis_vx) + (-0.707107f * chassis_vy) + chassis_vw*R) *1266.0f ;
+   chassis_motor4_speed =  ( (0.707107f  * chassis_vx) + (0.707107f  * chassis_vy) + chassis_vw*R) *1266.0f ;
 }
 
 /**

@@ -44,13 +44,13 @@ void StartMotorTask(void const *argument);
  */
 void RobotOSTaskCreate(void)
 {   
-    osThreadDef(IMU, StartIMUTask, osPriorityRealtime, 0, 256);
+    osThreadDef(IMU, StartIMUTask, osPriorityAboveNormal, 0, 256);
     IMUTaskHandle = osThreadCreate(osThread(IMU), NULL);
-    osThreadDef(deamon, StartDaemonTask, osPriorityBelowNormal, 0, 128);
+    osThreadDef(deamon, StartDaemonTask, osPriorityNormal, 0, 128);
     daemonTaskHandle = osThreadCreate(osThread(deamon), NULL);
     osThreadDef(Robot,StartRoBotTask,osPriorityNormal,0,1024);
     RobotTaskHandle = osThreadCreate(osThread(Robot),NULL);
-    osThreadDef(motortask,StartMotorTask,osPriorityAboveNormal,0,256);
+    osThreadDef(motortask,StartMotorTask,osPriorityNormal,0,256);
     motorTaskHandle = osThreadCreate(osThread(motortask),NULL);
 }
 
@@ -95,13 +95,13 @@ __attribute__((noreturn)) void StartRoBotTask(void const *argument)
   float RoBot_start;
 LOGINFO("[freeRTOS] RoBot Task Start");
 for(;;){
-        //1000Hz
+        //500Hz
         RoBot_start = DWT_GetTimeline_ms();
         RobotTask() ;
         RoBot_dt = DWT_GetTimeline_ms() - RoBot_start;
         if(RoBot_dt>2)
          LOGERROR("[freeRTOS] chassis Task is being DELAY! dt = [%f]",&RoBot_dt);
-         osDelay(1);
+         osDelay(2);
     }
 }
 
@@ -111,13 +111,13 @@ __attribute__((noreturn)) void StartMotorTask(void const *argument)
      float motor_start;
     LOGINFO("[freeRTOS] MOTOR Task Start");
     for (;;)
-    {   //500HZ
+    {   //1000HZ
         motor_start = DWT_GetTimeline_ms();
         MotorControlTask();
         motor_dt = DWT_GetTimeline_ms() - motor_start;
         if (motor_dt > 1)
             LOGERROR("[freeRTOS] MOTOR Task is being DELAY! dt = [%f]", &motor_dt);
-        osDelay(2);
+        osDelay(1);
     }  
 } 
 

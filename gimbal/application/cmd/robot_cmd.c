@@ -28,7 +28,7 @@ CANCommInstance *cmd_can_comm ;
 #define PITCH_HORIZON_ANGLE    (PITCH_HORIZON_ECD * ECD_ANGLE_COEF_DJI)    //对齐时的pitch角度  （0~360）
 
 //FSI6
-float STICK_TO_SPEED_CHASSIS = 0.5f; // 摇杆到速度的比例系数(CHASSIS)
+float STICK_TO_SPEED_CHASSIS = 0.01f; // 摇杆到速度的比例系数(CHASSIS)（最大速度是 7.84 m/s）
 float STICK_TO_SPEED_GIMBAL =  0.01f; // 摇杆到速度的比例系数(GIMBAL)
 FSI6Data_t *fs16data;
 
@@ -37,7 +37,7 @@ Chassis_Ctrl_Cmd_s chassis_cmd_send; // 地盘控制指令发送结构体
 Chassis_Upload_Data_s chassis_feedback_date; // 底盘feedback date 回传
 
 //GIMBAL_CMD
-Publisher_t *gimbal_cmd_pub;  //cmd send publisher insatance
+Publisher_t *gimbal_cmd_pub;  //cmd send publisher insatance  
 Subscriber_t *gimbal_cmd_sub; //feedback subscriber insatance
 Gimbal_Ctrol_Cmd_s gimbal_cmd_send;  //云台控制指令发送结构体
 Gimbal_Upload_Date_s gimbal_feedback; //云台feedback date 回传
@@ -146,8 +146,8 @@ static void RoBotCmdRemoteControlSet(void)
     }
 
    //chassis建立死区
-   fs16data->L_LR = fabsf(fs16data->L_LR) < 50 ? 0 : fs16data->L_LR ;   //绝对值是否小于50 ，是取0 ，否取通道值本身
-   fs16data->L_UD = fabsf(fs16data->L_UD) < 50 ? 0 : fs16data->L_UD ; 
+   fs16data->L_LR = abs(fs16data->L_LR) < 50.0f ? 0.0f : fs16data->L_LR ;   //绝对值是否小于50 ，是取0 ，否取通道值本身
+   fs16data->L_UD = abs(fs16data->L_UD) < 50.0f ? 0.0f : fs16data->L_UD ; 
    //传入遥控参量
    chassis_cmd_send.VX = STICK_TO_SPEED_CHASSIS * (fs16data->L_UD);   // 前后平移
    chassis_cmd_send.VY = STICK_TO_SPEED_CHASSIS * (fs16data->L_LR);   // 左右平移
@@ -155,20 +155,20 @@ static void RoBotCmdRemoteControlSet(void)
    //pitch
    if( fs16data->R_UD > 50  )
    {
-     gimbal_cmd_send.pitch += 0.5 ;     
+     gimbal_cmd_send.pitch += 0.5f ;     
    }
    else if ( fs16data->R_UD < -50)
    {
-     gimbal_cmd_send.pitch -= 0.5 ;
+     gimbal_cmd_send.pitch -= 0.5f ;
    }
    //yaw
    if( fs16data->R_LR > 50 )
    {
-     gimbal_cmd_send.yaw += 0.5 ;
+     gimbal_cmd_send.yaw += 0.5f ;
    }
    else if ( fs16data->R_LR < -50)
    {
-     gimbal_cmd_send.yaw -= 0.5 ;
+     gimbal_cmd_send.yaw -= 0.5f ;
    }
 }
 
