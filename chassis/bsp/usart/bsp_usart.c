@@ -28,12 +28,7 @@ static USARTInstance *usart_instance[DEVICE_USART_CNT] = {NULL};
  */
 void USARTServiceInit(USARTInstance *_instance)
 {   
-    if(_instance->data_mode == USART_FIX_DATA)
-    {
-        // 如果是固定长度数据,直接设置recv_buff_size
-        _instance->recv_buff_size = _instance->recv_buff_size;
-    }
-    else if(_instance->data_mode == USART_VAR_DATA)
+    if(_instance->data_mode == USART_VAR_DATA)
     {
         // 如果是变长数据,填写recv_buff_size为最大缓冲区值
         _instance->recv_buff_size = USART_RXBUFF_LIMIT; 
