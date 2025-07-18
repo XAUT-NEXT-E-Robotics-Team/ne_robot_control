@@ -1,14 +1,23 @@
+/**
+ * @file referee.c
+ * @author imgzw
+ * @brief 
+ * @version 0.1
+ * @date 2025-07-18
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
+
 #include "referee.h"
+#include "bsp_usart.h"
 
-/* 外部变量声明 */
-extern UART_HandleTypeDef huart6;        // UART6句柄，用于与裁判系统通信
-extern DMA_HandleTypeDef hdma_usart6_rx; // UART6接收DMA句柄
-extern DMA_HandleTypeDef hdma_usart6_tx; // UART6发送DMA句柄
+static USARTInstance *referee_usart_instance; // 裁判系统USART实例指针
 
-/* 全局变量定义 */
-uint8_t usart_buf[2][USART_RX_BUF_LENGHT];        // 双缓冲区，用于DMA接收数据
+extern 
 fifo_s_t referee_fifo;                             // 裁判系统数据FIFO缓冲区
 uint8_t referee_fifo_buf[REFEREE_FIFO_BUF_LENGTH]; // FIFO缓冲区数组
+
 unpack_data_t referee_unpack_obj;                  // 数据解包对象
 frame_header_struct_t referee_receive_header;      // 接收数据帧头
 frame_header_struct_t referee_send_header;         // 发送数据帧头
@@ -33,7 +42,7 @@ ground_robot_position_t ground_robot_position;        // 0x020B 地面机器人�
 radar_mark_data_t radar_mark_data;                    // 0x020C 雷达标记进度数据
 robot_interaction_data_t robot_interaction_data;      // 0x0301 机器人间交互数据
 referee_remote_control_t referee_remote_control;      // 0x0304 裁判系统遥控器数据
-robot_custom_data_t robot_custom_data;			      // 0x0309 自定义控制器数据
+robot_custom_data_t robot_custom_data;                // 0x0309 自定义控制器数据
 
 
 /**
@@ -42,7 +51,7 @@ robot_custom_data_t robot_custom_data;			      // 0x0309 自定义控制器数�
  * @retval None
  * @note   将所有裁判系统相关的数据结构体清零初始化
  */
-void init_referee_struct_data(void) {
+static void init_referee_struct_data(void) {
   // 初始化帧头结构体
   memset(&referee_receive_header, 0, sizeof(frame_header_struct_t));
   memset(&referee_send_header, 0, sizeof(frame_header_struct_t));
@@ -79,7 +88,7 @@ void init_referee_struct_data(void) {
  * @retval None
  * @note   根据命令ID解析不同类型的裁判系统数据包
  */
-void referee_data_solve(uint8_t *frame) {
+static void referee_data_solve(uint8_t *frame) {
   uint16_t cmd_id = 0;    // 命令ID
   uint8_t index = 0;      // 数据索引
 
@@ -162,16 +171,28 @@ void referee_data_solve(uint8_t *frame) {
  * @retval None
  * @note   初始化裁判系统数据结构体、FIFO缓冲区和串口DMA
  */
-void refereeINIT() {
+void RefereeInit(USART_HandleTypeDef *huart_referee) {
   // 初始化裁判系统数据结构体
   init_referee_struct_data();
   
   // 初始化用于存储裁判系统接收数据的FIFO缓冲区
   fifo_s_init(&referee_fifo, referee_fifo_buf, REFEREE_FIFO_BUF_LENGTH);
   
-  // 初始化UART6接收的DMA配置，使用双缓冲模式
-  referee_usart_init(&huart6, &hdma_usart6_rx, &hdma_usart6_tx, usart_buf[0], usart_buf[1],
-                     USART_RX_BUF_LENGHT);
+  USART_Init_Config_s usart_config;
+  usart_config.data_mode = USART_VAR_DATA; // 裁判系统数据为变
+  usart_config.recv_buff_size = REFEREE_FIFO_BUF_LENGTH; // 接收缓冲区大小
+  usart_config.module_callback = referee_usart_rx_callback; // 串口接收回调函数
+  usart_config.usart_handle = huart_referee; // 传入hak库usart句柄
+  // 初始化裁判系统USART实例
+  referee_usart_instance = USARTRegister(&usart_config);
+  if (referee_usart_instance == NULL) {
+    LOGERROR("[referee] USART Register Failed");
+    return;
+  }
+  //初始化接收
+  USARTServiceInit(referee_usart_instance);
+  LOGGER("[referee] USART Init Success");
+ 
   // 裁判系统初始化完成，准备接收数据
 }
 
@@ -266,56 +287,13 @@ void referee_unpack_fifo_data(void) {
 }
 
 /**
- * @brief  裁判系统串口空闲中断处理函数
- * @param  None
+ * @brief 裁判系统数据接收回调函数
+ * @param Size: 接收到的数据长度
  * @retval None
- * @note   在串口接收中断中调用，处理双缓冲DMA接收的数据
- *         当检测到串口空闲时，将接收到的数据放入FIFO缓冲区
+ * @note 该函数在串口接收中断时被调用，将接收到的数据放入FIFO缓冲区
  */
-void refereeReceiveHandler(void) {
-  static volatile uint8_t res;
-  
-  // 检查是否产生串口空闲中断
-  if (USART6->SR & UART_FLAG_IDLE) {
-    __HAL_UART_CLEAR_PEFLAG(&huart6);  // 清除空闲中断标志
-
-    static uint16_t this_time_rx_len = 0;  // 本次接收数据长度
-
-    // 检查当前使用的内存缓冲区
-    if ((huart6.hdmarx->Instance->CR & DMA_SxCR_CT)
-        == RESET) { /* 当前使用的是内存缓冲区0 */
-
-      // 关闭DMA，CPU处理当前缓冲区数据
-      __HAL_DMA_DISABLE(huart6.hdmarx);
-
-      // 获取接收数据长度 = 设定长度 - 剩余长度
-      this_time_rx_len = USART_RX_BUF_LENGHT - __HAL_DMA_GET_COUNTER(huart6.hdmarx);
-
-      // CPU重新设置DMA计数器
-      __HAL_DMA_SET_COUNTER(huart6.hdmarx, USART_RX_BUF_LENGHT);
-
-      // CPU处理完缓冲区0数据后，切换DMA到内存缓冲区1
-      huart6.hdmarx->Instance->CR |= DMA_SxCR_CT;
-
-      // 重新启用DMA
-      __HAL_DMA_ENABLE(huart6.hdmarx);
-
-      // CPU将内存缓冲区0的数据存入FIFO
-      fifo_s_puts(&referee_fifo, (char *)usart_buf[0], this_time_rx_len);
-      //  detect_hook(REFEREE_TOE); // 可选：离线检测钩子函数
-    }
-    else {
-      /* 当前使用的是内存缓冲区1 */
-      // 处理过程与缓冲区0相同
-      __HAL_DMA_DISABLE(huart6.hdmarx);
-      this_time_rx_len = USART_RX_BUF_LENGHT - __HAL_DMA_GET_COUNTER(huart6.hdmarx);
-      __HAL_DMA_SET_COUNTER(huart6.hdmarx, USART_RX_BUF_LENGHT);
-      // 切换DMA到内存缓冲区0
-      huart6.hdmarx->Instance->CR &= ~(DMA_SxCR_CT);
-      __HAL_DMA_ENABLE(huart6.hdmarx);
-      // CPU将内存缓冲区1的数据存入FIFO
-      fifo_s_puts(&referee_fifo, (char *)usart_buf[1], this_time_rx_len);
-      //  detect_hook(REFEREE_TOE); // 可选：离线检测钩子函数
-    }
-  }
+static void referee_usart_rx_callback(uint16_t Size) {
+  // 将接收到的数据放入FIFO缓冲区
+  fifo_s_puts(&referee_fifo, (char *)referee_usart_instance[0], Size);
+  //@todo:进程守护 喂狗
 }

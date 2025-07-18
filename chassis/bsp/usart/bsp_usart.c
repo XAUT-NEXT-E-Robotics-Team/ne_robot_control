@@ -27,7 +27,17 @@ static USARTInstance *usart_instance[DEVICE_USART_CNT] = {NULL};
  * @param _instance instance owned by module,模块拥有的串口实例
  */
 void USARTServiceInit(USARTInstance *_instance)
-{
+{   
+    if(_instance->data_mode == USART_FIX_DATA)
+    {
+        // 如果是固定长度数据,直接设置recv_buff_size
+        _instance->recv_buff_size = _instance->recv_buff_size;
+    }
+    else if(_instance->data_mode == USART_VAR_DATA)
+    {
+        // 如果是变长数据,填写recv_buff_size为最大缓冲区值
+        _instance->recv_buff_size = USART_RXBUFF_LIMIT; 
+    }
     HAL_UARTEx_ReceiveToIdle_DMA(_instance->usart_handle, _instance->recv_buff, _instance->recv_buff_size);
     // 关闭dma half transfer中断防止两次进入HAL_UARTEx_RxEventCallback()
     // 这是HAL库的一个设计失误,发生DMA传输完成/半完成以及串口IDLE中断都会触发HAL_UARTEx_RxEventCallback()
@@ -50,9 +60,9 @@ USARTInstance *USARTRegister(USART_Init_Config_s *init_config)
     memset(instance, 0, sizeof(USARTInstance));
 
     instance->usart_handle = init_config->usart_handle;
+    instance->data_mode = init_config->data_mode;
     instance->recv_buff_size = init_config->recv_buff_size;
     instance->module_callback = init_config->module_callback;
-
     usart_instance[idx++] = instance;
     USARTServiceInit(instance);
     return instance;
@@ -106,7 +116,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
         { // call the callback function if it is not NULL
             if (usart_instance[i]->module_callback != NULL)
             {
-                usart_instance[i]->module_callback();
+                usart_instance[i]->module_callback(Size); // 调用模块的回调函数
                 memset(usart_instance[i]->recv_buff, 0, Size); // 接收结束后清空buffer,对于变长数据是必要的
             }
             HAL_UARTEx_ReceiveToIdle_DMA(usart_instance[i]->usart_handle, usart_instance[i]->recv_buff, usart_instance[i]->recv_buff_size);

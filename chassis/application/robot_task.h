@@ -26,9 +26,11 @@
 #include "bsp_init.h"
 #include "motor_task.h"
 #include "chassis.h"
+#include "referee.h"
 osThreadId daemonTaskHandle;
 osThreadId RobotTaskHandle;
 osThreadId motorTaskHandle;
+osThreadId referee
 void StartDaemonTask(void const *argument);
 void StartRoBotTask(void const *argument);
 void StartMotorTask(void const *argument);
