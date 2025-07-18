@@ -29,13 +29,13 @@
 typedef enum
 {
     PID_IMPROVE_NONE                = 0x00,  // 0000 0000      不启用任何优化功能
-    PID_Integral_Limit              = 0x01,  // 0000 0001      积分限幅 或 抗积分饱和 
+    PID_Integral_Limit              = 0x01,  // 0000 0001      积分限幅 或 抗积分饱和   加
     PID_Derivative_On_Measurement   = 0x02,  // 0000 0010      对测量值求微分 
-    PID_Trapezoid_Intergral         = 0x04,  // 0000 0100      梯形积分
-    PID_Proportional_On_Measurement = 0x08,  // 0000 1000      对测量值计算比例项 
-    PID_OutputFilter                = 0x10,  // 0001 0000      输出滤波
+    PID_Trapezoid_Intergral         = 0x04,  // 0000 0100      梯形积分                加
+    PID_Proportional_On_Measurement = 0x08,  // 0000 1000      对测量值计算比例项       
+    PID_OutputFilter                = 0x10,  // 0001 0000      输出滤波              
     PID_ChangingIntegrationRate     = 0x20,  // 0010 0000      变速积分 或 积分分离
-    PID_DerivativeFilter            = 0x40,  // 0100 0000      微分先行滤波
+    PID_DerivativeFilter            = 0x40,  // 0100 0000      微分先行滤波            加
     PID_ErrorHandle                 = 0x80   // 1000 0000, 注意这里末尾没有逗号    错误处理
 } PID_Improvement_e;
 
@@ -57,41 +57,41 @@ typedef struct
 {
     //---------------------------------- init config block
     // config parameter
-    float Kp;
-    float Ki;
-    float Kd;
-    float MaxOut;
-    float DeadBand;
+    float Kp;                           //比例增益
+    float Ki;                           //积分增益
+    float Kd;                           //微分增益
+    float MaxOut;                       //最大输出
+    float DeadBand;                     //死区     （当误差小于这个值的时候保持上一次状态）
 
     // improve parameter
     PID_Improvement_e Improve;
     float IntegralLimit;     // 积分限幅
-    float CoefA;             // 变速积分 For Changing Integral
+    float CoefA;             // 变速积分 For Changing Integral    
     float CoefB;             // 变速积分 ITerm = Err*((A-abs(err)+B)/A)  when B<|err|<A+B
     float Output_LPF_RC;     // 输出滤波器 RC = 1/omegac
     float Derivative_LPF_RC; // 微分滤波器系数
 
     //-----------------------------------
     // for calculating
-    float Measure;
-    float Last_Measure;
-    float Err;
-    float Last_Err;
-    float Last_ITerm;
-
-    float Pout;
+    float Measure;                      //当前的测量值
+    float Last_Measure;                 //上一次的测量值
+    float Err;                          //当前的误差
+    float Last_Err;                     //上一次的误差
+    float Last_ITerm;                   //上一次的积分项
+ 
+    float Pout;                         
     float Iout;
     float Dout;
-    float ITerm;
+    float ITerm;                        //积分累加项
 
     float Output;
     float Last_Output;
     float Last_Dout;
 
-    float Ref;
+    float Ref;                          //目标值
 
-    uint32_t DWT_CNT;
-    float dt;
+    uint32_t DWT_CNT;                   
+    float dt;                           //时间差值s
 
     PID_ErrorHandler_t ERRORHandler;
 } PIDInstance;

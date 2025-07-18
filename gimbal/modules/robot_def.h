@@ -9,8 +9,8 @@
 //GIMBAL
 #define PITCH_MAX    15.0f        //云台向上最大角度
 #define PITCH_MIN    -15.0f       //云台向下最大角度 
-#define YAW_CHASSIS_ANGLE_ECD   2435   //根据具体云台和底盘对齐时的YAW轴的电机的ECD
-#define PITCH_HORIZON_ECD    3000
+#define YAW_CHASSIS_ANGLE_ECD   2410   //根据具体云台和底盘对齐时的YAW轴的电机的ECD
+#define PITCH_HORIZON_ECD       5591
         
 //SHOOT
 #define ONEBULLUTANGLE     15.0f  //一颗弹丸所占的角度

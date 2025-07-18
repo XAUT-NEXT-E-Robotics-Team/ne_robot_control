@@ -28,8 +28,8 @@ CANCommInstance *cmd_can_comm ;
 #define PITCH_HORIZON_ANGLE    (PITCH_HORIZON_ECD * ECD_ANGLE_COEF_DJI)    //对齐时的pitch角度  （0~360）
 
 //FSI6
-float STICK_TO_SPEED_CHASSIS = 0.01f; // 摇杆到速度的比例系数(CHASSIS)（最大速度是 7.84 m/s）
-float STICK_TO_SPEED_GIMBAL =  0.01f; // 摇杆到速度的比例系数(GIMBAL)
+float STICK_TO_SPEED_CHASSIS = 0.02f; // 摇杆到速度的比例系数(CHASSIS)（最大速度是 7.84 * 2 m/s）
+float STICK_TO_SPEED_GIMBAL =  0.5f; // 摇杆到速度的比例系数(GIMBAL)
 FSI6Data_t *fs16data;
 
 //CHASSIS_CMD
@@ -119,11 +119,11 @@ static void RoBotCmdRemoteControlSet(void)
     else if (fs16data->SC_CH7 == RC_SW_MID)
     {   //enable all robot (follow mode)
         chassis_cmd_send.chassis_mode = chassis_follow ;
-        gimbal_cmd_send.gimbal_mode = GIMBAL_GYRO_MODE ; 
+        gimbal_cmd_send.gimbal_mode = GIMBAL_FREE_MODE ; 
     }
     else if (fs16data->SC_CH7 == RC_SW_DOWN && fs16data->V1_L > 200)
     {   
-        gimbal_cmd_send.gimbal_mode = GIMBAL_GYRO_MODE ;             
+        gimbal_cmd_send.gimbal_mode = GIMBAL_FREE_MODE ;             
         chassis_cmd_send.chassis_mode = chassis_ZiZhua;                                          
         chassis_cmd_send.WZ = (fs16data->V2_R)-RC_KNOB_MIN; // 由V2映射小陀螺的速度,并建立死区防止误触(开启小陀螺，给WZ赋值)
     }
@@ -155,21 +155,26 @@ static void RoBotCmdRemoteControlSet(void)
    //pitch
    if( fs16data->R_UD > 50  )
    {
-     gimbal_cmd_send.pitch += 0.5f ;     
+     gimbal_cmd_send.pitch += 0.15f ;     
    }
    else if ( fs16data->R_UD < -50)
    {
-     gimbal_cmd_send.pitch -= 0.5f ;
+     gimbal_cmd_send.pitch -= 0.15f ;
    }
    //yaw
-   if( fs16data->R_LR > 50 )
+   if( fs16data->R_LR > 180 )
    {
-     gimbal_cmd_send.yaw += 0.5f ;
+     gimbal_cmd_send.yaw += 0.6f ;
    }
-   else if ( fs16data->R_LR < -50)
+   else if ( fs16data->R_LR < -180)
    {
-     gimbal_cmd_send.yaw -= 0.5f ;
+     gimbal_cmd_send.yaw -= 0.6f ;
    }
+
+if(gimbal_cmd_send.pitch>20.0f)    gimbal_cmd_send.pitch = 20.0f ;
+if(gimbal_cmd_send.pitch<-34.0f)   gimbal_cmd_send.pitch = -34.0f ;
+if(gimbal_cmd_send.yaw >= 175.0f)   gimbal_cmd_send.yaw = 175.0f ;
+if(gimbal_cmd_send.yaw <= -175.0f)  gimbal_cmd_send.yaw = -175.0f ;
 }
 
 /* ROBOT核心控制任务,200Hz频率运行(必须高于视觉发送频率) */

@@ -35,33 +35,34 @@ Gimbal_Upload_Date_s gimbal_feedback_date;      //define gimbal_update struct ( 
    Motor_Init_Config_s yaw_config = {
        .can_init_config = {
        .can_handle = &hcan1,
-       .tx_id = 7 ,           //send ID
+       .tx_id = 3 ,           //send ID
       },
       .controller_param_init_config = {
       .angle_PID = {
-        .Kp = 0.11f,
+        .Kp = 1.0f,
         .Ki = 0.00f,
-        .Kd = 0.5f,
-        .IntegralLimit = 2.0f,  //积分限幅
+        .Kd = 0.01f,
+        .IntegralLimit = 0.0f,  //积分限幅
         .MaxOut = 6.0f ,        //输出限幅
         .DeadBand = 0.1 ,       //死区
-        .Improve = (PID_Improvement_e)(PID_Trapezoid_Intergral|PID_Integral_Limit|PID_Derivative_On_Measurement), //梯形积分|积分限幅|对测量值计算比例项
+        .Improve = (PID_Improvement_e)(PID_Trapezoid_Intergral|PID_Integral_Limit|PID_DerivativeFilter), //梯形积分|积分限幅|微分先行
       },
       .speed_PID = {
-        .Kp = 24000.0f,
-        .Ki = 0.25f,
+        .Kp = -4500.0f,
+        .Ki = 0.0f,
         .Kd = 0.0f,
-        .IntegralLimit = 2000.0f,  //
+        .IntegralLimit = 0.0f,  //
         .MaxOut = 15000.0f,
-        .Improve = (PID_Improvement_e)(PID_Trapezoid_Intergral|PID_Integral_Limit|PID_Derivative_On_Measurement), //梯形积分|积分限幅|对测量值计算比例项
+        .Improve = (PID_Improvement_e)(PID_Trapezoid_Intergral|PID_Integral_Limit|PID_DerivativeFilter), //梯形积分|积分限幅|微分先行
       },
-			.other_angle_feedback_ptr = &gimba_IMU_date->YawTotalAngle, 
+
+			.other_angle_feedback_ptr = &gimba_IMU_date->Yaw, 
      //其他的反馈值     
       .other_speed_feedback_ptr = &gimba_IMU_date->Gyro[2],
        },
       .controller_setting_init_config = {
-        .angle_feedback_source = OTHER_FEED ,        // MOTOR_FEED|OTHER_FEED :使用后者需要指定数据来源
-        .speed_feedback_source = OTHER_FEED ,         //(暂时先用电机的反馈值) speed 可先用DJI电机来源 ，角度选择BMI088
+        .angle_feedback_source =    OTHER_FEED ,        // MOTOR_FEED|OTHER_FEED :使用后者需要指定数据来源
+        .speed_feedback_source =    OTHER_FEED ,         //(暂时先用电机的反馈值) speed 可先用DJI电机来源 ，角度选择BMI088
         .outer_loop_type = ANGLE_LOOP ,
         .close_loop_type =(Closeloop_Type_e)(ANGLE_LOOP | SPEED_LOOP) , //速度环与角度环 
         .motor_reverse_flag = MOTOR_DIRECTION_NORMAL , //电机正反转标志
@@ -71,28 +72,28 @@ Gimbal_Upload_Date_s gimbal_feedback_date;      //define gimbal_update struct ( 
     Motor_Init_Config_s pitch_config = {
        .can_init_config = {
         .can_handle = &hcan1 , //can_handle_type
-        .tx_id = 6 ,       //send ID
+        .tx_id = 2				 ,       //send ID
        },
        .controller_param_init_config ={
         .angle_PID = {
-          .Kp = 1.0f , 
-          .Ki = 0.01f ,
-          .Kd = 1.0f ,
-          .IntegralLimit = 3.0f ,
+          .Kp = -1.0f , 
+          .Ki = -0.00f ,
+          .Kd = -0.05f ,
+          .IntegralLimit = 0.00f ,
           .MaxOut = 8.0f ,
-          .Improve = (PID_Improvement_e)(PID_Trapezoid_Intergral|PID_Integral_Limit|PID_Derivative_On_Measurement), //梯形积分|积分限幅|对测量值计算比例项
+          .Improve = (PID_Improvement_e)(PID_Trapezoid_Intergral|PID_Integral_Limit|PID_DerivativeFilter), //梯形积分|微分先行
         },
         .speed_PID = {
-          .Kp = 7000.0f ,
-          .Ki = 10.0f ,
-          .Kd = 0.0f ,
-          .IntegralLimit = 5000.0f ,
+          .Kp = 1000.0f ,
+          .Ki = 0.0f ,
+          .Kd = 10.0f ,
+          .IntegralLimit = 0.0f ,
           .MaxOut = 15000.0f ,
-          .Improve = (PID_Improvement_e)(PID_Trapezoid_Intergral|PID_Integral_Limit|PID_Derivative_On_Measurement), //梯形积分|积分限幅|对测量值计算比例项
+          .Improve = (PID_Improvement_e)(PID_Trapezoid_Intergral|PID_Integral_Limit|PID_DerivativeFilter), //梯形积分|微分先行
         },
        //其他的反馈值     
-        .other_angle_feedback_ptr = &gimba_IMU_date->Pitch ,
-        .other_speed_feedback_ptr = &gimba_IMU_date->Gyro[0] ,
+        .other_angle_feedback_ptr = &gimba_IMU_date->Roll ,
+        .other_speed_feedback_ptr = &gimba_IMU_date->Gyro[1] ,
 
        },
        .controller_setting_init_config = {
@@ -100,7 +101,7 @@ Gimbal_Upload_Date_s gimbal_feedback_date;      //define gimbal_update struct ( 
         .speed_feedback_source = OTHER_FEED ,
         .outer_loop_type = ANGLE_LOOP ,
         .close_loop_type = (Closeloop_Type_e)(ANGLE_LOOP | SPEED_LOOP) ,
-        .motor_reverse_flag = MOTOR_DIRECTION_NORMAL ,
+        .motor_reverse_flag = MOTOR_DIRECTION_REVERSE ,
        },
        .motor_type = GM6020 }; 
       //DJI_motor
@@ -126,7 +127,7 @@ void GimbalTask()
     DJIMotorStop(MOTOR_PITCH);
     break;
      //云台跟随底盘模式
-  case GIMBAL_GYRO_MODE :
+  case GIMBAL_FREE_MODE :             //   GIMBAL_GYRO_MODE :
     DJIMotorEnable(MOTOR_YAW);        //enable YAW and PITCH
     DJIMotorEnable(MOTOR_PITCH);
     DJIMotorChangeFeed(MOTOR_YAW,ANGLE_LOOP,OTHER_FEED);   //change feedback frome
@@ -136,14 +137,14 @@ void GimbalTask()
     DJIMotorSetRef(MOTOR_YAW,gimbal_cmd_recv.yaw);         //seting djimotor 
     DJIMotorSetRef(MOTOR_PITCH,gimbal_cmd_recv.pitch);
     break;
-  case GIMBAL_FREE_MODE: //先不加这个，这个适用于hero吊射 ，对于步兵个人觉得没必要
+  case GIMBAL_GYRO_MODE: //先不加这个，这个适用于hero吊射 ，对于步兵个人觉得没必要
     break;  
   default:
     break;
   }
   
    
-  // 设置反馈数据,主要是imu和yaw的ecd  
+  //设置反馈数据,主要是imu和yaw的ecd  
   gimbal_feedback_date.gimbal_imu_date =  *gimba_IMU_date;
   gimbal_feedback_date.yaw_motor_single_round_angle = MOTOR_YAW->measure.angle_single_round;
 

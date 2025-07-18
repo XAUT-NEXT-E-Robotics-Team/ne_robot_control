@@ -87,7 +87,7 @@ frirightmotor = DJIMotorInit(&frictionmotor_config);
         .close_loop_type = (Closeloop_Type_e)(ANGLE_LOOP | SPEED_LOOP) } ,
     .motor_type = M3508 };              //seting motor type
 
-loadermotor = DJIMotorInit(&loadermotor_config);    //seting loadermotor
+    loadermotor = DJIMotorInit(&loadermotor_config);    //seting loadermotor
 
 //finish publisher register and subscriber register
 shoot_sub = SubRegister("shootcmd",sizeof(Shoot_Ctrol_Cmd_s));
