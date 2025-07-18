@@ -17,8 +17,9 @@
 #define USART_RX_BUF_LENGHT     512
 #define REFEREE_FIFO_BUF_LENGTH 1024
 
-void RefereeInit(void);
+void RefereeInit(UART_HandleTypeDef *huart_referee);
 void referee_unpack_fifo_data(void);
+static void referee_usart_rx_callback(uint16_t Size);
 
 
 #endif

@@ -11,10 +11,12 @@
 
 #include "referee.h"
 #include "bsp_usart.h"
+#include "bsp_log.h"
+#include "crc8.h"
+#include "crc16.h"
 
 static USARTInstance *referee_usart_instance; // 裁判系统USART实例指针
 
-extern 
 fifo_s_t referee_fifo;                             // 裁判系统数据FIFO缓冲区
 uint8_t referee_fifo_buf[REFEREE_FIFO_BUF_LENGTH]; // FIFO缓冲区数组
 
@@ -171,7 +173,7 @@ static void referee_data_solve(uint8_t *frame) {
  * @retval None
  * @note   初始化裁判系统数据结构体、FIFO缓冲区和串口DMA
  */
-void RefereeInit(USART_HandleTypeDef *huart_referee) {
+void RefereeInit(UART_HandleTypeDef *huart_referee) {
   // 初始化裁判系统数据结构体
   init_referee_struct_data();
   
@@ -180,8 +182,8 @@ void RefereeInit(USART_HandleTypeDef *huart_referee) {
   
   USART_Init_Config_s usart_config;
   usart_config.data_mode = USART_VAR_DATA; // 裁判系统数据为变
-  usart_config.recv_buff_size = REFEREE_FIFO_BUF_LENGTH; // 接收缓冲区大小
-  usart_config.module_callback = referee_usart_rx_callback; // 串口接收回调函数
+  usart_config.recv_buff_size = 256; // 接收缓冲区大小
+  usart_config.module_callback = &referee_usart_rx_callback; // 串口接收回调函数
   usart_config.usart_handle = huart_referee; // 传入hak库usart句柄
   // 初始化裁判系统USART实例
   referee_usart_instance = USARTRegister(&usart_config);
@@ -191,7 +193,7 @@ void RefereeInit(USART_HandleTypeDef *huart_referee) {
   }
   //初始化接收
   USARTServiceInit(referee_usart_instance);
-  LOGGER("[referee] USART Init Success");
+  LOGINFO("[referee] USART Init Success");
  
   // 裁判系统初始化完成，准备接收数据
 }
@@ -252,7 +254,7 @@ void referee_unpack_fifo_data(void) {
         p_obj->protocol_packet[p_obj->index++] = byte;
         if (p_obj->index == REF_PROTOCOL_HEADER_SIZE) {
           // 验证帧头CRC8校验和
-          if (verify_CRC8_check_sum(p_obj->protocol_packet, REF_PROTOCOL_HEADER_SIZE)) {
+          if (crc_8(p_obj->protocol_packet, REF_PROTOCOL_HEADER_SIZE)) {
             p_obj->unpack_step = STEP_DATA_CRC16;  // 帧头校验成功，继续接收数据
           }
           else {  // 帧头校验失败，重新开始
@@ -271,7 +273,7 @@ void referee_unpack_fifo_data(void) {
           p_obj->index = 0;
 
           // 验证整帧数据的CRC16校验和
-          if (verify_CRC16_check_sum(p_obj->protocol_packet,
+          if (crc_16(p_obj->protocol_packet,
                                      REF_HEADER_CRC_CMDID_LEN + p_obj->data_len)) {
             referee_data_solve(p_obj->protocol_packet);  // 校验成功，解析数据包
           }
@@ -294,6 +296,6 @@ void referee_unpack_fifo_data(void) {
  */
 static void referee_usart_rx_callback(uint16_t Size) {
   // 将接收到的数据放入FIFO缓冲区
-  fifo_s_puts(&referee_fifo, (char *)referee_usart_instance[0], Size);
+  fifo_s_puts(&referee_fifo, (char *)referee_usart_instance->recv_buff, Size);
   //@todo:进程守护 喂狗
 }

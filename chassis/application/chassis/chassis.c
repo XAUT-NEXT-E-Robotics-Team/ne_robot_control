@@ -13,7 +13,7 @@
 
 #include "chassis.h"
 #include "robot_def.h"
-extern UART_HandleTypeDef huart6; // 裁判系统USART句柄
+#include "usart.h"
 
 #include "message_center.h"
 #include "dji_motor.h"
@@ -24,6 +24,9 @@ extern UART_HandleTypeDef huart6; // 裁判系统USART句柄
 
 #include "motor_def.h"
 #include "can_comm.h"
+
+extern UART_HandleTypeDef huart6; // 裁判系统USART句柄
+
 /*根据robot_def.h中的macro自动计算的参数*/
 #define HALF_WHEEL_BASE (WHEEL_BASE / 2.0f)        // 半轴长
 #define HALF_TRACK_WIDTH (TRACK_WIDTH / 2.0f)      // 半轮距
