@@ -9,7 +9,6 @@
 
   <project>
     <PathAndName>.\chassis\MDK-ARM\ne_chassis.uvprojx</PathAndName>
-    <NodeIsExpanded>1</NodeIsExpanded>
   </project>
 
   <project>

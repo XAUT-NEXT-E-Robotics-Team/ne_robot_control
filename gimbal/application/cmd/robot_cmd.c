@@ -19,7 +19,8 @@
 // bsp
 #include "bsp_dwt.h"
 #include "bsp_log.h"
-
+#include "general_def.h"  
+#include "controller.h"
 //双机通信
 #include "can_comm.h"
 CANCommInstance *cmd_can_comm ;
@@ -52,6 +53,9 @@ Shoot_Ctrol_Cmd_s shoot_cmd_send ; //发射控制指令的结构体
 // robot整体工作状态
 Robot_Status_e robot_state;          
 
+//跟随pid
+PIDInstance follow_pid ;
+PID_Init_Config_s follow_PID ;
 
 void RobotCmdInit(void)
 {
@@ -64,6 +68,16 @@ void RobotCmdInit(void)
     gimbal_cmd_send.yaw = 0.0f ; 
     
     shoot_cmd_pub = PubRegister("shoot_cmd", sizeof(Shoot_Ctrol_Cmd_s)); //shoot cmd control publisher register
+
+    //地盘云台follow PID初始化  
+     follow_PID.Kp = -1.0f ;
+     follow_PID.Ki = 0.0f ;
+     follow_PID.Kd = 0.0f ;
+     follow_PID.IntegralLimit = 0.0f ;
+     follow_PID.MaxOut = 100 ;
+     follow_PID.DeadBand = 0.5 ;
+     follow_PID.Improve = (PID_Improvement_e)(PID_Trapezoid_Intergral|PID_Integral_Limit|PID_DerivativeFilter) ;
+     PIDInit(&follow_pid,&follow_PID);
 
     CANComm_Init_Config_s comm_conf = {
         .can_config = {
@@ -82,7 +96,18 @@ void RobotCmdInit(void)
 /**
  * @brief 根据gimbal app传回的当前电机角度计算和零位的误差
  *        单圈绝对角度的范围是0~360,说明文档中有图示
- *
+ *                       \        chassis_Y   ___  gimbal_x
+ *                         \        /|\         /|  
+ *                           \     / | \      /  | 
+ *                             \     |(thete)/
+ *    /                          \   |     /
+ *   /                             \ |   /  
+ * chassis_X —————————————————————————————————————————————————————————————————————— 
+ *   \                             / |  \
+ *    \                          /   |    \
+ *                             /     |      \
+ *                           /       |        \  | 
+ *                         /         |       ___\| gimbal_y
  */
 static void CalcOffsetAngle ()
 {
@@ -99,6 +124,9 @@ static void CalcOffsetAngle ()
   {
    chassis_cmd_send.offset_angle = angle - YAW_ALING_ANGLE ;  
   }
+
+  chassis_cmd_send.WZ =  PIDCalculate(&follow_pid,chassis_cmd_send.offset_angle , 0 );
+
 }
 
 
@@ -121,7 +149,7 @@ static void RoBotCmdRemoteControlSet(void)
         chassis_cmd_send.chassis_mode = chassis_follow ;
         gimbal_cmd_send.gimbal_mode = GIMBAL_FREE_MODE ; 
     }
-    else if (fs16data->SC_CH7 == RC_SW_DOWN && fs16data->V1_L > 200)
+    else if (fs16data->SC_CH7 == RC_SW_DOWN && fs16data->V1_L > 500)
     {   
         gimbal_cmd_send.gimbal_mode = GIMBAL_FREE_MODE ;             
         chassis_cmd_send.chassis_mode = chassis_ZiZhua;                                          
@@ -129,10 +157,11 @@ static void RoBotCmdRemoteControlSet(void)
     }
 
     //SB_AND_V2_LOGIC      ------>> shoot mode
-    if(fs16data->V2_R>200)
+    if(fs16data->V2_R>1000)
     { //enable friction motor    
       shoot_cmd_send.shoot_mode = SHOOT_ON ;
-      //choose loader motor mode
+      shoot_cmd_send.friction_mode = FRICTION_ON ; 
+       //choose loader motor mode
       switch (fs16data->SB_CH6)
       {
       case RC_SW_UP :
@@ -144,6 +173,12 @@ static void RoBotCmdRemoteControlSet(void)
         break;
       }
     }
+    else 
+    {
+      shoot_cmd_send.shoot_mode = SHOOT_OFF ;
+      shoot_cmd_send.friction_mode = FRICTION_OFF ; 
+    } 
+
 
    //chassis建立死区
    fs16data->L_LR = abs(fs16data->L_LR) < 50.0f ? 0.0f : fs16data->L_LR ;   //绝对值是否小于50 ，是取0 ，否取通道值本身
@@ -153,28 +188,27 @@ static void RoBotCmdRemoteControlSet(void)
    chassis_cmd_send.VY = STICK_TO_SPEED_CHASSIS * (fs16data->L_LR);   // 左右平移
    //gimbal建立死区
    //pitch
-   if( fs16data->R_UD > 50  )
-   {
-     gimbal_cmd_send.pitch += 0.15f ;     
-   }
-   else if ( fs16data->R_UD < -50)
-   {
-     gimbal_cmd_send.pitch -= 0.15f ;
-   }
+//   if( fs16data->R_UD > 50  )
+//   {
+//     gimbal_cmd_send.pitch += 0.15f ;     
+//   }
+//   else if ( fs16data->R_UD < -50)
+//   {
+//     gimbal_cmd_send.pitch -= 0.15f ;
+//   }
    //yaw
    if( fs16data->R_LR > 180 )
    {
-     gimbal_cmd_send.yaw += 0.6f ;
+     gimbal_cmd_send.yaw -= 0.6f ;
    }
    else if ( fs16data->R_LR < -180)
    {
-     gimbal_cmd_send.yaw -= 0.6f ;
+     gimbal_cmd_send.yaw += 0.6f ;
    }
 
-if(gimbal_cmd_send.pitch>20.0f)    gimbal_cmd_send.pitch = 20.0f ;
-if(gimbal_cmd_send.pitch<-34.0f)   gimbal_cmd_send.pitch = -34.0f ;
-if(gimbal_cmd_send.yaw >= 175.0f)   gimbal_cmd_send.yaw = 175.0f ;
-if(gimbal_cmd_send.yaw <= -175.0f)  gimbal_cmd_send.yaw = -175.0f ;
+    gimbal_cmd_send.pitch =0.0f ;	 
+    if(gimbal_cmd_send.pitch>20.0f)     gimbal_cmd_send.pitch = 20.0f ;
+    if(gimbal_cmd_send.pitch<-34.0f)    gimbal_cmd_send.pitch = -34.0f ;
 }
 
 /* ROBOT核心控制任务,200Hz频率运行(必须高于视觉发送频率) */

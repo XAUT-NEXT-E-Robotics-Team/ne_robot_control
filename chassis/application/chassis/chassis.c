@@ -61,8 +61,8 @@ void ChassisInit()
               .Kp = 5.1f, 
               .Kd = 0.005f,
               .Ki = 0.2f,
-              .IntegralLimit = 1000.0f,
-              .Improve = (PID_Improvement_e)(PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement),
+              .IntegralLimit = 0.0f,
+              .Improve = (PID_Improvement_e)(PID_Trapezoid_Intergral | PID_Integral_Limit | PID_DerivativeFilter ),
               .MaxOut = 16000.0f,
           },
       },
@@ -150,21 +150,18 @@ void ChassisTask()
     chassis_cmd_recv.WZ = 0; // 角速度
     break;
   case chassis_follow:
-     chassis_cmd_recv.WZ =  -1.5f * chassis_cmd_recv.offset_angle * abs(chassis_cmd_recv.offset_angle); // 角速度
+    chassis_vw = chassis_cmd_recv.WZ; // 角速度
     break;
   case chassis_ZiZhua:
-    chassis_cmd_recv.WZ = 5000; // 角速度
+    chassis_vw = 50; // 角速度
     break; // 小陀螺模式
   default:
+    chassis_cmd_recv.WZ = 0; // 角速度
     break; // 其他情况
   }
-
-//  static sin_thete ,cos_thete ;
-//  cos_thete = arm_cos_f32(chassis_cmd_recv.offset_angle * DEGREE_2_RAD);
-//  sin_thete = arm_sin_f32(chassis_cmd_recv.offset_angle * DEGREE_2_RAD);
   chassis_vx = chassis_cmd_recv.VX ; // 前进速度
   chassis_vy = chassis_cmd_recv.VY ; // 横向速度
-//  chassis_vw =    chassis_cmd_recv.WZ;
+
   // 根据控制模式进行正运动学解算,计算底盘输出
   MecanumCalculate();
 

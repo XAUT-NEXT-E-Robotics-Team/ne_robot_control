@@ -33,16 +33,17 @@ void ShootInit()
    } ,
    .controller_param_init_config = {
     .speed_PID = {
-        .Kp = 20.0f ,
-        .Ki = 0.00f ,
-        .Kd = 40.0f ,
+        .Kp = 3.0f ,
+        .Ki = 0.13f ,
+        .Kd = 0.002f ,
         .IntegralLimit = 1000.0f ,
-        .MaxOut = 16384.0f ,
+        .MaxOut = 16000.0f ,
         .Improve = (PID_Improvement_e)(PID_Trapezoid_Intergral|PID_Integral_Limit|PID_Derivative_On_Measurement),
     },
    },
    .controller_setting_init_config = {
     .speed_feedback_source = MOTOR_FEED , //feedback date from motor
+		.outer_loop_type = SPEED_LOOP , 
     .close_loop_type = SPEED_LOOP , //choose cloop type
     .motor_reverse_flag = MOTOR_DIRECTION_NORMAL ,  //motor_run_deriction flag
    },
@@ -84,13 +85,15 @@ frirightmotor = DJIMotorInit(&frictionmotor_config);
         .speed_feedback_source = MOTOR_FEED ,
         .angle_feedback_source = MOTOR_FEED ,
         .motor_reverse_flag = MOTOR_DIRECTION_NORMAL ,
+        .outer_loop_type = ANGLE_LOOP ,
         .close_loop_type = (Closeloop_Type_e)(ANGLE_LOOP | SPEED_LOOP) } ,
+        
     .motor_type = M3508 };              //seting motor type
 
     loadermotor = DJIMotorInit(&loadermotor_config);    //seting loadermotor
 
 //finish publisher register and subscriber register
-shoot_sub = SubRegister("shootcmd",sizeof(Shoot_Ctrol_Cmd_s));
+shoot_sub = SubRegister("shoot_cmd",sizeof(Shoot_Ctrol_Cmd_s));
 //shoot_pub = PubRegister("shootfeedback",sizeof());   //shoot部分没有其他要传回来的了，可以直接在keil中查出对应的电机状态
 
 }
@@ -149,12 +152,12 @@ if(shoot_cmd_recv.friction_mode == FRICTION_ON)
     DJIMotorSetRef(frirightmotor,6000);
     break;
   case BULLET_SPEED2:                   //friction    speed = 18 
-    DJIMotorSetRef(frileftmotor,7000);      //(set speed :5500~7000)
-    DJIMotorSetRef(frirightmotor,7000);
+    DJIMotorSetRef(frileftmotor,6000);      //(set speed :5500~7000)
+    DJIMotorSetRef(frirightmotor,6000);
     break;
   default:
-    DJIMotorSetRef(frileftmotor,7000);      //(set speed :5500~7000)
-    DJIMotorSetRef(frirightmotor,7000);
+    DJIMotorSetRef(frileftmotor,-12000);      //(set speed :5500~7000)
+    DJIMotorSetRef(frirightmotor,12000);
     break;
   }
 }

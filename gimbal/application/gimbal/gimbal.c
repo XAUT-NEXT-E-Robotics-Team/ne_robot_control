@@ -41,22 +41,22 @@ Gimbal_Upload_Date_s gimbal_feedback_date;      //define gimbal_update struct ( 
       .angle_PID = {
         .Kp = 1.0f,
         .Ki = 0.00f,
-        .Kd = 0.01f,
+        .Kd = 0.03f,
         .IntegralLimit = 0.0f,  //积分限幅
         .MaxOut = 6.0f ,        //输出限幅
-        .DeadBand = 0.1 ,       //死区
+        .DeadBand = 0.2 ,       //死区
         .Improve = (PID_Improvement_e)(PID_Trapezoid_Intergral|PID_Integral_Limit|PID_DerivativeFilter), //梯形积分|积分限幅|微分先行
       },
       .speed_PID = {
-        .Kp = -4500.0f,
+        .Kp = -2000.0f,
         .Ki = 0.0f,
-        .Kd = 0.0f,
+        .Kd = -0.4f,
         .IntegralLimit = 0.0f,  //
         .MaxOut = 15000.0f,
         .Improve = (PID_Improvement_e)(PID_Trapezoid_Intergral|PID_Integral_Limit|PID_DerivativeFilter), //梯形积分|积分限幅|微分先行
       },
 
-			.other_angle_feedback_ptr = &gimba_IMU_date->Yaw, 
+			.other_angle_feedback_ptr = &gimba_IMU_date->YawTotalAngle, 
      //其他的反馈值     
       .other_speed_feedback_ptr = &gimba_IMU_date->Gyro[2],
        },
