@@ -27,8 +27,11 @@ static USARTInstance *usart_instance[DEVICE_USART_CNT] = {NULL};
  * @param _instance instance owned by module,模块拥有的串口实例
  */
 void USARTServiceInit(USARTInstance *_instance)
-{
+{   
+    //注意 这里使用了串口dma空闲中断接收 这里的recv_buff_size只要大于最大接收的数据量即可 不需要一样
+    //是补不定长接收方式
     HAL_UARTEx_ReceiveToIdle_DMA(_instance->usart_handle, _instance->recv_buff, _instance->recv_buff_size);
+
     // 关闭dma half transfer中断防止两次进入HAL_UARTEx_RxEventCallback()
     // 这是HAL库的一个设计失误,发生DMA传输完成/半完成以及串口IDLE中断都会触发HAL_UARTEx_RxEventCallback()
     // 我们只希望处理第一种和第三种情况,因此直接关闭DMA半传输中断

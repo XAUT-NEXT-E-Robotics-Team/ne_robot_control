@@ -13,15 +13,20 @@
 
 #include "chassis.h"
 #include "robot_def.h"
+#include "usart.h"
 
 #include "message_center.h"
 #include "dji_motor.h"
 #include "arm_math.h"
 #include "general_def.h"
 #include "bsp_dwt.h"
+#include "referee.h"
 
 #include "motor_def.h"
 #include "can_comm.h"
+
+extern UART_HandleTypeDef huart6; // 裁判系统USART句柄
+
 /*根据robot_def.h中的macro自动计算的参数*/
 #define HALF_WHEEL_BASE (WHEEL_BASE / 2.0f)        // 半轴长
 #define HALF_TRACK_WIDTH (TRACK_WIDTH / 2.0f)      // 半轮距
@@ -96,6 +101,7 @@ void ChassisInit()
       .recv_data_len = sizeof(Chassis_Ctrl_Cmd_s),     //底盘接受云台CMD数据
   };
   chassis_can_comm = CANCommInit(&config);   // CHASSIS_BOARD
+  RefereeInit(&huart6); // 初始化裁判系统,传入裁判系统的USART句柄
 }
 
 /**

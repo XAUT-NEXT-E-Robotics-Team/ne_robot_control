@@ -26,12 +26,18 @@
 #include "bsp_init.h"
 #include "motor_task.h"
 #include "chassis.h"
+#include "referee.h"
+
 osThreadId daemonTaskHandle;
 osThreadId RobotTaskHandle;
 osThreadId motorTaskHandle;
+osThreadId refereeTaskHandle;
+
 void StartDaemonTask(void const *argument);
 void StartRoBotTask(void const *argument);
 void StartMotorTask(void const *argument);
+void StartRefereeTask(void const *argument);
+
 /**
  * @brief 创建相关任务
  * @
@@ -39,12 +45,14 @@ void StartMotorTask(void const *argument);
  */
 void RobotOSTaskCreate(void)
 {
-    osThreadDef(deamon, StartDaemonTask, osPriorityNormal, 0, 128);
+    osThreadDef(deamon, StartDaemonTask, osPriorityBelowNormal, 0, 128);
     daemonTaskHandle = osThreadCreate(osThread(deamon), NULL);
-    osThreadDef(Robot,StartRoBotTask,osPriorityNormal,0,1024);
+    osThreadDef(Robot,StartRoBotTask,osPriorityAboveNormal,0,1024);
     RobotTaskHandle = osThreadCreate(osThread(Robot),NULL);
     osThreadDef(motortask,StartMotorTask,osPriorityNormal,0,256);
     motorTaskHandle = osThreadCreate(osThread(motortask),NULL);
+    osThreadDef(refereetask,StartRefereeTask,osPriorityBelowNormal,0,256);
+    refereeTaskHandle = osThreadCreate(osThread(refereetask),NULL);
 }
 
 
@@ -96,6 +104,22 @@ __attribute__((noreturn)) void StartMotorTask(void const *argument)
         osDelay(1);
     }  
 } 
+
+__attribute__((noreturn)) void StartRefereeTask(void const *argument)
+{   //100Hz
+    static float referee_dt;
+    static float referee_start;
+    LOGINFO("[freeRTOS] Referee Task Start");
+    for (;;)
+    {
+        referee_start = DWT_GetTimeline_ms();
+        referee_unpack_fifo_data();
+        referee_dt = DWT_GetTimeline_ms() - referee_start;
+        if (referee_dt > 10)
+            LOGERROR("[freeRTOS] Referee Task is being DELAY! dt = [%f]", &referee_dt);
+        osDelay(10);
+    }  
+}
 
 
 
