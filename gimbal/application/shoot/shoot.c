@@ -14,6 +14,7 @@
 #include "message_center.h"
 #include "bsp_dwt.h"
 #include "general_def.h"
+#include "cmsis_os.h"
 
 //define frileftmotor frirightmotor  loadermotor 
 DJIMotorInstance *frileftmotor ,*frirightmotor ,*loadermotor ;
@@ -118,9 +119,19 @@ void ShootTask()
     DJIMotorStop(frirightmotor);
     DJIMotorStop(loadermotor);
    }
-    switch (shoot_cmd_recv.loader_mode)
-    {
-      case LOAD_1_BULLET :                   //shoot once (2.3连发可由操作手掌握，所以放在连发一起)
+
+   switch (shoot_cmd_recv.loader_mode)
+   {
+     //卡弹处理
+     if(loadermotor->measure.real_current >= 9.5  ) {
+      osDelay(200);  //0.2s
+      if(loadermotor->measure.real_current >= 9.5 )  //电流长时间(0.2s)过高 ，确认卡弹 
+      shoot_cmd_recv.loader_mode = LOAD_REVERSE ; //反转
+      else   shoot_cmd_recv.loader_mode = LOAD_BURSTFIRE ;  //等2s如果恢复正常状态 ，继续来连续发射 
+      }
+
+      case LOAD_1_BULLET :               
+        //shoot once (2.3连发可由操作手掌握，所以放在连发一起)
         DJIMotorOuterLoop(loadermotor,ANGLE_LOOP);
         DJIMotorSetRef(loadermotor,loadermotor->measure.total_angle + ONEBULLUTANGLE);
         //后面需要加时间（从DWT_GETTIM中获取时间优化操作手单发手感）
@@ -160,6 +171,7 @@ if(shoot_cmd_recv.friction_mode == FRICTION_ON)
     DJIMotorSetRef(frirightmotor,12000);
     break;
   }
+
 }
 else 
 {   // friction   speed = 0

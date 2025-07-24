@@ -15,7 +15,7 @@
 #include "crc8.h"
 #include "crc16.h"
 
-static USARTInstance *referee_usart_instance; // 裁判系统USART实例指针
+ USARTInstance *referee_usart_instance; // 裁判系统USART实例指针
 
 fifo_s_t referee_fifo;                             // 裁判系统数据FIFO缓冲区
 uint8_t referee_fifo_buf[REFEREE_FIFO_BUF_LENGTH]; // FIFO缓冲区数组
@@ -49,8 +49,7 @@ robot_custom_data_t robot_custom_data;                // 0x0309 自定义控制�
 
 /**
  * @brief  初始化裁判系统数据结构体
- * @param  None
- * @retval None
+ * @param  None * @retval None
  * @note   将所有裁判系统相关的数据结构体清零初始化
  */
 static void init_referee_struct_data(void) {

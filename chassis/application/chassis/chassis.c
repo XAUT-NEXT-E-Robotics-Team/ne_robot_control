@@ -25,6 +25,8 @@
 #include "motor_def.h"
 #include "can_comm.h"
 
+#include "SuperPower_control.h"
+
 extern UART_HandleTypeDef huart6; // 裁判系统USART句柄
 
 /*根据robot_def.h中的macro自动计算的参数*/
@@ -101,6 +103,7 @@ void ChassisInit()
       .recv_data_len = sizeof(Chassis_Ctrl_Cmd_s),     //底盘接受云台CMD数据
   };
   chassis_can_comm = CANCommInit(&config);   // CHASSIS_BOARD
+	
   RefereeInit(&huart6); // 初始化裁判系统,传入裁判系统的USART句柄
 }
 
@@ -122,6 +125,34 @@ static void MecanumCalculate()
  */
 static void LimitChassisOutput()
 {
+ //功率限制 
+ //4个电机的功率估计值
+   P_origin[0] = MOTOR_POWER_ESTIMATE(chassis_motor1_speed , MOTOR1->measure.speed_aps);
+   P_origin[1] = MOTOR_POWER_ESTIMATE(chassis_motor2_speed , MOTOR2->measure.speed_aps);
+   P_origin[2] = MOTOR_POWER_ESTIMATE(chassis_motor3_speed , MOTOR3->measure.speed_aps);
+   P_origin[3] = MOTOR_POWER_ESTIMATE(chassis_motor4_speed , MOTOR4->measure.speed_aps);
+ //求4个电机的总功率
+   P_chassis_total_origin  = P_origin[0] + P_origin[1] + P_origin[2] + P_origin[3] ;
+ //更新裁判系统的功率限制
+   P_chassis_total_max = robot_state.chassis_power_limit ;
+ //计算衰减比例
+ if( P_chassis_total_origin > P_chassis_total_max){
+   P_power =  CHassis_POWER_LIMIT (P_chassis_total_origin);
+   //按比例分别衰减对应的电机功率
+   P_origin[0] = P_power * P_origin[0] ;
+   P_origin[1] = P_power * P_origin[1] ;
+   P_origin[2] = P_power * P_origin[2] ;
+   P_origin[3] = P_power * P_origin[3] ;
+   //根据衰减之后的电机功率计算电机对应的扭矩电流
+   chassis_motor1_speed =  MOTOR_TORQUE_FACT(P_origin[0],chassis_motor1_speed,MOTOR1->measure.speed_aps);
+   chassis_motor2_speed =  MOTOR_TORQUE_FACT(P_origin[1],chassis_motor2_speed,MOTOR2->measure.speed_aps);
+   chassis_motor3_speed =  MOTOR_TORQUE_FACT(P_origin[2],chassis_motor3_speed,MOTOR3->measure.speed_aps);
+   chassis_motor4_speed =  MOTOR_TORQUE_FACT(P_origin[3],chassis_motor4_speed,MOTOR4->measure.speed_aps);
+
+   }
+  else{ } //如果没有超过功率限制，直接把PID算出来的扭矩电流赋值给电机
+
+
   // 完成功率限制后进行电机参考输入设定
   DJIMotorSetRef(MOTOR1, chassis_motor1_speed);
   DJIMotorSetRef(MOTOR2, chassis_motor2_speed);

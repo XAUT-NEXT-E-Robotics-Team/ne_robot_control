@@ -2,6 +2,10 @@
     "files.associations": {
         "robot_task.h": "c",
         "dji_motor.h": "c",
-        "controller.h": "c"
+        "controller.h": "c",
+        "arm_math.h": "c",
+        "general_def.h": "c",
+        "referee.h": "c",
+        "refereedata_v1.7.h": "c"
     }
 }

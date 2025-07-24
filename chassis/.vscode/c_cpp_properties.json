@@ -34,7 +34,9 @@
                 "modules/message_center",
                 "modules",
                 "Middlewares/Third_Party/SEGGER/Config",
-                "Middlewares/Third_Party/SEGGER/RTT"
+                "Middlewares/Third_Party/SEGGER/RTT",
+                "modules/referee",
+                "modules/SuperPower_control"
             ],
             "defines": [
                 "USE_HAL_DRIVER",
