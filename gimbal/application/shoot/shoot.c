@@ -100,8 +100,6 @@ shoot_sub = SubRegister("shoot_cmd",sizeof(Shoot_Ctrol_Cmd_s));
 }
 
 
-
-
 void ShootTask() 
 {
     //get cmd date
@@ -158,16 +156,16 @@ if(shoot_cmd_recv.friction_mode == FRICTION_ON)
 {
   switch(shoot_cmd_recv.Blluet_speed)
   {
-  case BULLET_SPEED1:                   //friction    speed = 15  (这个的实际去测一下)
+  case BULLET_SPEED1:                       //friction    speed = 15  (这个的实际去测一下)
     DJIMotorSetRef(frileftmotor,6000);      //(set speed :5500~7000)
     DJIMotorSetRef(frirightmotor,6000);
     break;
-  case BULLET_SPEED2:                   //friction    speed = 18 
+  case BULLET_SPEED2:                       //friction    speed = 18 
     DJIMotorSetRef(frileftmotor,6000);      //(set speed :5500~7000)
-    DJIMotorSetRef(frirightmotor,6000);
+    DJIMotorSetRef(frirightmotor,6000); 
     break;
   default:
-    DJIMotorSetRef(frileftmotor,-12000);      //(set speed :5500~7000)
+    DJIMotorSetRef(frileftmotor,-12000);     //(set speed :5500~7000)
     DJIMotorSetRef(frirightmotor,12000);
     break;
   }

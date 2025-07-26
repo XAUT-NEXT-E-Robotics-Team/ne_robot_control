@@ -133,8 +133,23 @@ static void LimitChassisOutput()
    P_origin[3] = MOTOR_POWER_ESTIMATE(chassis_motor4_speed , MOTOR4->measure.speed_aps);
  //求4个电机的总功率
    P_chassis_total_origin  = P_origin[0] + P_origin[1] + P_origin[2] + P_origin[3] ;
- //更新裁判系统的功率限制
+
+ //更新底盘当前状态
+   Supercap_update_txd(&supercap_txD, &robot_state);
+ //发送底盘当前状态
+   Supercap_transmit(&huart1 ,&supercap_txD);
+ //接受抄点的反馈值  
+   Supercap_unpack(&supercap_rxD);
+ //更新机器人的实际功率限制
+   if(supercap_err_flg == 1) 
+   {//如果超电出错
+   P_chassis_total_max = robot_state.chassis_power_limit  ;}
+   else { //等待加入图传链路控制(按键控制开超电)
+    // if( ) { chassis_max_power = supercap_rxD.max_cap_power + robot_state.chassis_power_limit ; }
+    // else {     
    P_chassis_total_max = robot_state.chassis_power_limit ;
+   };
+
  //计算衰减比例
  if( P_chassis_total_origin > P_chassis_total_max){
    P_power =  CHassis_POWER_LIMIT (P_chassis_total_origin);

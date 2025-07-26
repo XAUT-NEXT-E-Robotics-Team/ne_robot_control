@@ -7,14 +7,92 @@
 
 #include "SuperPower_control.h"
 //裁判系统
+
 #include "referee.h"
 #include "arm_math.h"
+#include "usart.h"
+
 
 float P_origin[4]  ;        //4个电机的功率估计输出值
 float P_chassis_total_origin =0.0f ; //本次SPEED_PID输出的计算出来的输入的总功率 
 float P_chassis_total_max = 50.0  ;  //由裁判系统传入实际的值
 float P_chassis_output = 0.0f ;      //功率限制最终的输出值 
 float P_power =1.0f ;                //功率衰减系数
+//超电
+supercap_rx_t supercap_rxD ;
+supercap_tx_t supercap_txD ;
+
+uint8_t supercap_rx_flg = 0 ;
+uint8_t supercap_err_flg = 0 ;
+uint8_t referee_rx_flg = 0 ;
+
+/**
+ * @file 超电接收解包
+ * @param supercap   超电接收结构体
+ */
+
+void Supercap_unpack( supercap_rx_t *supercap ) 
+{
+  if(supercap->err_code != 0) 
+  {
+   HAL_UARTEx_ReceiveToIdle_DMA(&huart1, supercap_rxD.rx_buf ,sizeof(supercap_rxD.rx_buf)); 
+  }
+  supercap->head = supercap->rx_buf[0] << 8 | supercap->rx_buf[1] ;
+  if(supercap->head == SUPERCAP_RX_HEAD && supercap_rx_flg == 1)
+  {
+   supercap->raw_cap_power = (supercap->rx_buf[2] | supercap->rx_buf[3] << 8);           //原始值 0.01w
+   supercap->max_cap_power = (supercap->rx_buf[2] | supercap->rx_buf[3] << 8) * 0.01f ;  //电容最大提供功率 w
+   supercap->cap_percent = (supercap->rx_buf[4] | supercap->rx_buf[5] << 8 );            //电容余量   
+   supercap->input_power = (supercap->rx_buf[6] | supercap->rx_buf[7] << 8 );            //总输入功率
+   supercap->err_code = (supercap->rx_buf[8] | supercap->rx_buf[9] << 8 );                
+   
+   if(supercap->max_cap_power >= 50) // 保证超电提供的功率不超过50W
+   {
+    supercap_rxD.max_cap_power = 50 ;
+   }
+   else if (supercap->max_cap_power < 0 )
+   {
+    supercap_rxD.max_cap_power = 0 ;
+   }
+  
+  if(supercap->err_code != 0 ){ 
+     supercap_err_flg = 1 ; 
+  }
+  else { supercap_err_flg = 0 ;}
+  }
+}
+
+
+/**
+ * @file 给超电发送数据
+ * @param robot_state 机器人状态
+ * @param supercap_tx 超电发送结构体
+ */
+void Supercap_update_txd(supercap_tx_t* supercap_tx, robot_state_t* const robot_state) 
+{
+  supercap_tx->head = SUPERCAP_TX_HEAD ;
+  if(referee_rx_flg == 1)
+  {
+    supercap_tx->chassis_poweer_limit = robot_state->chassis_power_limit ;
+    supercap_tx->chassis_power_state  =robot_state->power_management_chassis_output ;
+  }
+  else 
+  {
+    supercap_tx->chassis_poweer_limit = 50 ;
+    supercap_tx->chassis_power_state = 1 ;
+  }
+}
+
+/**
+ * @file 发送函数
+ * @param huart 句柄
+ * @param supercap_tx 发送结构体
+ */
+void Supercap_transmit(UART_HandleTypeDef* huart ,supercap_tx_t * supercap_tx)
+{
+ HAL_UART_Transmit_DMA( huart , (uint8_t*)supercap_tx , sizeof(supercap_tx_t)); 
+}
+
 
 
 /**
@@ -25,7 +103,6 @@ float  abs_fp32 (float input)
   if(input>0)  return input ;
   else  return -input ;
 } 
-
 
 /**
  * 
