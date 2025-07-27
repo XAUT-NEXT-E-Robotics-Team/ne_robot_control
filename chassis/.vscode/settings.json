@@ -6,6 +6,10 @@
         "arm_math.h": "c",
         "general_def.h": "c",
         "referee.h": "c",
-        "refereedata_v1.7.h": "c"
+        "refereedata_v1.7.h": "c",
+        "heat_limit.h": "c",
+        "robot.h": "c",
+        "robot_def.h": "c",
+        "superpower_control.h": "c"
     }
 }

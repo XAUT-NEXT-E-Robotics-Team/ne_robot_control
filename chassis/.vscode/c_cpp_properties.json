@@ -36,7 +36,8 @@
                 "Middlewares/Third_Party/SEGGER/Config",
                 "Middlewares/Third_Party/SEGGER/RTT",
                 "modules/referee",
-                "modules/SuperPower_control"
+                "modules/SuperPower_control",
+                "modules/heat_limit"
             ],
             "defines": [
                 "USE_HAL_DRIVER",

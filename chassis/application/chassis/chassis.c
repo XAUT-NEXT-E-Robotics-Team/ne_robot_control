@@ -26,6 +26,7 @@
 #include "can_comm.h"
 
 #include "SuperPower_control.h"
+#include "heat_limit.h"
 
 extern UART_HandleTypeDef huart6; // 裁判系统USART句柄
 
@@ -214,12 +215,17 @@ void ChassisTask()
   chassis_vx = chassis_cmd_recv.VX ; // 前进速度
   chassis_vy = chassis_cmd_recv.VY ; // 横向速度
 
+  //热量限制
+  Shoot_Heat_limit_task();
+  //弹频
+  chassis_feedback_date.shoot_freqlimit  =  shoot_speed_limit.shoot_frequency_limit ;
+
   // 根据控制模式进行正运动学解算,计算底盘输出
   MecanumCalculate();
 
   // 根据裁判系统的反馈数据和电容数据对输出限幅并设定闭环参考值
   LimitChassisOutput();
+
   // 反馈数据给上板
-	//chassis_feedback_date.shoot_Speed=100.0f;
   CANCommSend(chassis_can_comm,(void *)&chassis_feedback_date);
 }

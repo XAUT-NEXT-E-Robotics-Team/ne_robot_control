@@ -188,14 +188,15 @@ static void RoBotCmdRemoteControlSet(void)
    chassis_cmd_send.VY = STICK_TO_SPEED_CHASSIS * (fs16data->L_LR);   // 左右平移
    //gimbal建立死区
    //pitch
-//   if( fs16data->R_UD > 50  )
-//   {
-//     gimbal_cmd_send.pitch += 0.15f ;     
-//   }
-//   else if ( fs16data->R_UD < -50)
-//   {
-//     gimbal_cmd_send.pitch -= 0.15f ;
-//   }
+   if( fs16data->R_UD > 50  )
+   {
+     gimbal_cmd_send.pitch += 0.15f ;     
+   }
+   else if ( fs16data->R_UD < -50)
+   {
+     gimbal_cmd_send.pitch -= 0.15f ;
+
+   }
    //yaw
    if( fs16data->R_LR > 180 )
    {

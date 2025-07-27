@@ -8,8 +8,8 @@
 
 
 enum FireFlag {
-  HOLD_FIRE = 0 , 
-  OPEN_FIRE = 1 , 
+  HOLD_FIRE = 0 , //开摩擦轮
+  OPEN_FIRE = 1 , //拨弹
 } ;
 
 enum our_color{
@@ -59,7 +59,7 @@ typedef struct VisionDataRX
 
 } VisionDatas;
 
-union  VsionDate 
+union  VisionDate 
 {
   VisionDatas VisionRxData ; 
   uint8_t     Rxdata[10] ; 
@@ -92,13 +92,34 @@ typedef struct VisionDataTX {
 } visionTX;
 
 typedef struct VisionDataAll {
-  //union VisionData RXData;
+  union VisionDate RXData;
   visionTX TXData;
 } VisionConnect;
 
+#pragma pack() //恢复默认对齐
 
+enum aim_type //接受视觉正在瞄准的类型 
+{
+  CAR = 0 ,   //机器人 
+  OUT_POST ,  //前哨站
+  RUME ,      //能量机关
+};
 
+typedef struct
+{
+	uint8_t aoto_aim_state;	// 自瞄状态 不能跟踪(0) | 能跟踪(1)
+	uint8_t our_color;			// 我方颜色 'R'(red) | 'B'(blue)
+	uint8_t tracking;				// 是否锁到敌人 0(no) | 1(yes)
+	uint8_t aim_type;				// 从视觉接收的 正在自瞄的目标类型 enum类型
+} VisionState;
 
+extern VisionConnect vision1;
+extern VisionState visionState;
 
-
+void Vision_ConectINIT( VisionConnect *conect , uint8_t OurColor );
+void VisionConnectUpdateTX(VisionConnect *connect, uint8_t OurColor, float yawAngle,
+                           float pitchAngle, float shootSpeed) ;
+void VisionConnectSend(VisionConnect *connnect) ;
+void VisionGetState(VisionConnect* connect, VisionState* visionState); 
+                         
 #endif 
