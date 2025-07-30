@@ -10,6 +10,8 @@
         "heat_limit.h": "c",
         "robot.h": "c",
         "robot_def.h": "c",
-        "superpower_control.h": "c"
+        "superpower_control.h": "c",
+        "slope_plan.h": "c",
+        "bsp_can.h": "c"
     }
 }

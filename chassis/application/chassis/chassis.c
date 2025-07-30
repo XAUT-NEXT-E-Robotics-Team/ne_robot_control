@@ -27,6 +27,7 @@
 
 #include "SuperPower_control.h"
 #include "heat_limit.h"
+#include "Slope_Plan.h"
 
 extern UART_HandleTypeDef huart6; // 裁判系统USART句柄
 
@@ -214,6 +215,12 @@ void ChassisTask()
   }
   chassis_vx = chassis_cmd_recv.VX ; // 前进速度
   chassis_vy = chassis_cmd_recv.VY ; // 横向速度
+  
+  //斜坡规划
+  Slope_Plan_init(&Slope_Plan,chassis_vx,chassis_vy, MOTOR1->measure.speed_aps , MOTOR2->measure.speed_aps  ,MOTOR3->measure.speed_aps ,MOTOR4->measure.speed_aps );
+  Slope_Plan_work( &Slope_Plan );
+  chassis_vx = Slope_Plan.plan_speed_VX ;
+  chassis_vy = Slope_Plan.plan_speed_VY ;
 
   //热量限制
   Shoot_Heat_limit_task();
