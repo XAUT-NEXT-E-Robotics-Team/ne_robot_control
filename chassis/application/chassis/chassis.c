@@ -140,7 +140,7 @@ static void LimitChassisOutput()
    Supercap_update_txd(&supercap_txD, &robot_state);
  //发送底盘当前状态
    Supercap_transmit(&huart1 ,&supercap_txD);
- //接受抄点的反馈值  
+ //接受超电的反馈值  
    Supercap_unpack(&supercap_rxD);
  //更新机器人的实际功率限制
    if(supercap_err_flg == 1) 

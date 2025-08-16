@@ -82,7 +82,7 @@ __attribute__((noreturn)) void StartRoBotTask(void const *argument)
         RoBot_start = DWT_GetTimeline_ms();
         RobotTask() ;
         RoBot_dt = DWT_GetTimeline_ms() - RoBot_start;
-        if(RoBot_dt>2)
+        if(RoBot_dt>5)
          LOGERROR("[freeRTOS] chassis Task is being DELAY! dt = [%f]",&RoBot_dt);
          osDelay(5);
     }

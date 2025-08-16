@@ -17,6 +17,8 @@
 
  USARTInstance *referee_usart_instance; // 裁判系统USART实例指针
 
+
+ 
 fifo_s_t referee_fifo;                             // 裁判系统数据FIFO缓冲区
 uint8_t referee_fifo_buf[REFEREE_FIFO_BUF_LENGTH]; // FIFO缓冲区数组
 
@@ -186,6 +188,7 @@ void RefereeInit(UART_HandleTypeDef *huart_referee) {
   usart_config.usart_handle = huart_referee; // 传入hak库usart句柄
   // 初始化裁判系统USART实例
   referee_usart_instance = USARTRegister(&usart_config);
+  
   if (referee_usart_instance == NULL) {
     LOGERROR("[referee] USART Register Failed");
     return;

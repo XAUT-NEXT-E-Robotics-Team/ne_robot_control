@@ -12,6 +12,7 @@
         "robot_def.h": "c",
         "superpower_control.h": "c",
         "slope_plan.h": "c",
-        "bsp_can.h": "c"
+        "bsp_can.h": "c",
+        "bsp_usart.h": "c"
     }
 }
