@@ -182,7 +182,7 @@ void RefereeInit(UART_HandleTypeDef *huart_referee) {
   
   USART_Init_Config_s usart_config;
   usart_config.data_mode = USART_VAR_DATA; // 裁判系统数据为变
-  usart_config.recv_buff_size = (uint8_t)256; // 接收缓冲区大小
+  usart_config.recv_buff_size = 256; // 接收缓冲区大小
   usart_config.module_callback = &referee_usart_rx_callback; // 串口接收回调函数
   usart_config.usart_handle = huart_referee; // 传入hak库usart句柄
   // 初始化裁判系统USART实例

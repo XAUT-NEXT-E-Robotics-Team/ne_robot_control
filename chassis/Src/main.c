@@ -79,8 +79,8 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-	__HAL_RCC_HSI_ENABLE(); // 启用 HSI
-  __HAL_RCC_SYSCLK_CONFIG(RCC_SYSCLKSOURCE_HSI); // 切换系统时钟为 HSI
+
+  
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -108,12 +108,10 @@ int main(void)
   MX_SPI1_Init();
   MX_TIM4_Init();
   MX_TIM5_Init();
-  MX_USART3_UART_Init();
   MX_RNG_Init();
   MX_RTC_Init();
   MX_TIM1_Init();
   MX_TIM10_Init();
-  MX_USART1_UART_Init();
   MX_USART6_UART_Init();
   MX_TIM8_Init();
   MX_I2C2_Init();

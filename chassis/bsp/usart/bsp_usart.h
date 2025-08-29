@@ -32,7 +32,7 @@ typedef struct
 {
     uint8_t recv_buff[USART_RXBUFF_LIMIT]; // 预先定义的最大buff大小,如果太小请修改USART_RXBUFF_LIMIT
     USART_DATA_MODE data_mode;             // 数据模式,固定长度或可变长度
-    uint8_t recv_buff_size;                // 模块接收一包数据的大小(如果是固定长度，直接填写固定值，不是固定长度，填写为缓冲区大小)
+    uint16_t recv_buff_size;               // 模块接收一包数据的大小(如果是固定长度，直接填写固定值，不是固定长度，填写为缓冲区大小)
     UART_HandleTypeDef *usart_handle;      // 实例对应的usart_handle
     usart_module_callback module_callback; // 解析收到的数据的回调函数
 } USARTInstance;
@@ -40,7 +40,7 @@ typedef struct
 /* usart 初始化配置结构体 */
 typedef struct
 {
-    uint8_t recv_buff_size;                // 模块接收一包数据的大小(如果是固定长度，直接填写固定值，不是固定长度，填写为缓冲区大小或直接填0)
+    uint16_t recv_buff_size;               // 模块接收一包数据的大小(如果是固定长度，直接填写固定值，不是固定长度，填写为缓冲区大小或直接填0)
     USART_DATA_MODE data_mode;             // 数据模式,固定长度或可变长度
     UART_HandleTypeDef *usart_handle;      // 实例对应的usart_handle
     usart_module_callback module_callback; // 解析收到的数据的回调函数

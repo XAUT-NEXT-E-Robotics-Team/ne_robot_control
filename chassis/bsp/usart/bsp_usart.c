@@ -31,7 +31,7 @@ void USARTServiceInit(USARTInstance *_instance)
     if(_instance->data_mode == USART_VAR_DATA)
     {
         // 如果是变长数据,填写recv_buff_size为最大缓冲区值
-        _instance->recv_buff_size = USART_RXBUFF_LIMIT; 
+    _instance->recv_buff_size = (uint16_t)USART_RXBUFF_LIMIT; 
     }
     HAL_UARTEx_ReceiveToIdle_DMA(_instance->usart_handle, _instance->recv_buff, _instance->recv_buff_size);
     // 关闭dma half transfer中断防止两次进入HAL_UARTEx_RxEventCallback()
@@ -86,10 +86,8 @@ void USARTSend(USARTInstance *_instance, uint8_t *send_buf, uint16_t send_size, 
 /* 串口发送时,gstate会被设为BUSY_TX */
 uint8_t USARTIsReady(USARTInstance *_instance)
 {
-    if (_instance->usart_handle->gState | HAL_UART_STATE_BUSY_TX)
-        return 0;
-    else
-        return 1;
+    // ready when not busy transmitting
+    return (_instance->usart_handle->gState == HAL_UART_STATE_READY) ? 1 : 0;
 }
 
 /**

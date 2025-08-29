@@ -26,41 +26,6 @@ uint8_t supercap_rx_flg = 0 ;
 uint8_t supercap_err_flg = 0 ;
 uint8_t referee_rx_flg = 0 ;
 
-/**
- * @file 超电接收解包
- * @param supercap   超电接收结构体
- */
-
-void Supercap_unpack( supercap_rx_t *supercap ) 
-{
-  if(supercap->err_code != 0) 
-  {
-   HAL_UARTEx_ReceiveToIdle_DMA(&huart1, supercap_rxD.rx_buf ,sizeof(supercap_rxD.rx_buf)); 
-  }
-  supercap->head = supercap->rx_buf[0] << 8 | supercap->rx_buf[1] ;
-  if(supercap->head == SUPERCAP_RX_HEAD && supercap_rx_flg == 1)
-  {
-   supercap->raw_cap_power = (supercap->rx_buf[2] | supercap->rx_buf[3] << 8);           //原始值 0.01w
-   supercap->max_cap_power = (supercap->rx_buf[2] | supercap->rx_buf[3] << 8) * 0.01f ;  //电容最大提供功率 w
-   supercap->cap_percent = (supercap->rx_buf[4] | supercap->rx_buf[5] << 8 );            //电容余量   
-   supercap->input_power = (supercap->rx_buf[6] | supercap->rx_buf[7] << 8 );            //总输入功率
-   supercap->err_code = (supercap->rx_buf[8] | supercap->rx_buf[9] << 8 );                
-   
-   if(supercap->max_cap_power >= 50) // 保证超电提供的功率不超过50W
-   {
-    supercap_rxD.max_cap_power = 50 ;
-   }
-   else if (supercap->max_cap_power < 0 )
-   {
-    supercap_rxD.max_cap_power = 0 ;
-   }
-  
-  if(supercap->err_code != 0 ){ 
-     supercap_err_flg = 1 ; 
-  }
-  else { supercap_err_flg = 0 ;}
-  }
-}
 
 
 /**

@@ -29,7 +29,6 @@
 #include "heat_limit.h"
 #include "Slope_Plan.h"
 
-extern UART_HandleTypeDef huart6; // 裁判系统USART句柄
 
 /*根据robot_def.h中的macro自动计算的参数*/
 #define HALF_WHEEL_BASE (WHEEL_BASE / 2.0f)        // 半轴长
@@ -106,7 +105,7 @@ void ChassisInit()
   };
   chassis_can_comm = CANCommInit(&config);   // CHASSIS_BOARD
 	
-  RefereeInit(&huart1); // 初始化裁判系统,传入裁判系统的USART句柄
+  RefereeInit(&huart6); // 初始化裁判系统,传入裁判系统的USART句柄
 
 }
 
@@ -138,11 +137,11 @@ static void LimitChassisOutput()
    P_chassis_total_origin  = P_origin[0] + P_origin[1] + P_origin[2] + P_origin[3] ;
 
  //更新底盘当前状态
-   Supercap_update_txd(&supercap_txD, &robot_state);
+ //Supercap_update_txd(&supercap_txD, &robot_state);
  //发送底盘当前状态
-   Supercap_transmit(&huart1 ,&supercap_txD);
+ //Supercap_transmit(&huart1 ,&supercap_txD);
  //接受超电的反馈值  
-   Supercap_unpack(&supercap_rxD);
+ //Supercap_unpack(&supercap_rxD);
  //更新机器人的实际功率限制
    if(supercap_err_flg == 1) 
    {//如果超电出错

@@ -45,12 +45,12 @@ void StartRefereeTask(void const *argument);
  */
 void RobotOSTaskCreate(void)
 {
-    osThreadDef(deamon, StartDaemonTask, osPriorityBelowNormal, 0, 128);
-    daemonTaskHandle = osThreadCreate(osThread(deamon), NULL);
-    osThreadDef(Robot,StartRoBotTask,osPriorityAboveNormal,0,1024);
-    RobotTaskHandle = osThreadCreate(osThread(Robot),NULL);
-    osThreadDef(motortask,StartMotorTask,osPriorityNormal,0,256);
-    motorTaskHandle = osThreadCreate(osThread(motortask),NULL);
+//    osThreadDef(deamon, StartDaemonTask, osPriorityBelowNormal, 0, 128);
+//    daemonTaskHandle = osThreadCreate(osThread(deamon), NULL);
+//    osThreadDef(Robot,StartRoBotTask,osPriorityAboveNormal,0,1024);
+//    RobotTaskHandle = osThreadCreate(osThread(Robot),NULL);
+//    osThreadDef(motortask,StartMotorTask,osPriorityNormal,0,256);
+//    motorTaskHandle = osThreadCreate(osThread(motortask),NULL);
     osThreadDef(refereetask,StartRefereeTask,osPriorityBelowNormal,0,256);
     refereeTaskHandle = osThreadCreate(osThread(refereetask),NULL);
 }
