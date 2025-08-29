@@ -106,7 +106,8 @@ void ChassisInit()
   };
   chassis_can_comm = CANCommInit(&config);   // CHASSIS_BOARD
 	
-  RefereeInit(&huart6); // 初始化裁判系统,传入裁判系统的USART句柄
+  RefereeInit(&huart1); // 初始化裁判系统,传入裁判系统的USART句柄
+
 }
 
 /**

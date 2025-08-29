@@ -177,13 +177,12 @@ static void referee_data_solve(uint8_t *frame) {
 void RefereeInit(UART_HandleTypeDef *huart_referee) {
   // 初始化裁判系统数据结构体
   init_referee_struct_data();
-  
   // 初始化用于存储裁判系统接收数据的FIFO缓冲区
   fifo_s_init(&referee_fifo, referee_fifo_buf, REFEREE_FIFO_BUF_LENGTH);
   
   USART_Init_Config_s usart_config;
   usart_config.data_mode = USART_VAR_DATA; // 裁判系统数据为变
-  usart_config.recv_buff_size = 256; // 接收缓冲区大小
+  usart_config.recv_buff_size = (uint8_t)256; // 接收缓冲区大小
   usart_config.module_callback = &referee_usart_rx_callback; // 串口接收回调函数
   usart_config.usart_handle = huart_referee; // 传入hak库usart句柄
   // 初始化裁判系统USART实例
@@ -192,12 +191,14 @@ void RefereeInit(UART_HandleTypeDef *huart_referee) {
   if (referee_usart_instance == NULL) {
     LOGERROR("[referee] USART Register Failed");
     return;
+		
   }
   //初始化接收
   USARTServiceInit(referee_usart_instance);
   LOGINFO("[referee] USART Init Success");
  
   // 裁判系统初始化完成，准备接收数据
+	
 }
 
 /**

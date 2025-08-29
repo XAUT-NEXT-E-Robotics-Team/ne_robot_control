@@ -122,8 +122,4 @@ __attribute__((noreturn)) void StartRefereeTask(void const *argument)
 }
 
 
-
-
 #endif
-
-

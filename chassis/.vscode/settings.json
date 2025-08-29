@@ -13,6 +13,8 @@
         "superpower_control.h": "c",
         "slope_plan.h": "c",
         "bsp_can.h": "c",
-        "bsp_usart.h": "c"
+        "bsp_usart.h": "c",
+        "random": "c",
+        "limits": "c"
     }
 }
