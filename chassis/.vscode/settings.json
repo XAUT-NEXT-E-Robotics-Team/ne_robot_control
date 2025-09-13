@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "robot_def.h": "c",
+        "compare": "c",
+        "motor_def.h": "c",
+        "slope_plan.h": "c"
+    }
+}
