@@ -195,25 +195,28 @@ static void RoBotCmdRemoteControlSet(void)
   if( fs16data->V2_R > 240 + FSI6_V_DEAD_limit && fs16data->V2_R < 1807 + FSI6_V_DEAD_limit )
   {   
     //是否打弹 
-    switch( fs16data->SB_CH6 )
-    {
+    switch( fs16data->SB_CH6 ) 
+    { 
       case RC_SW_UP :
        shoot_cmd_send.shoot_mode_in = SHOOTER_HOLD ;//打开摩擦轮  
        break ;  
-      case RC_SW_DOWN :
+      case RC_SW_DOWN : 
        shoot_cmd_send.shoot_mode_in = SHOOTER_AUTO ;//发射  
        break ;  
-    }
+    } 
   }
   else shoot_cmd_send.shoot_mode_in = SHOOTER_STOP ; //失能所有电机
    //射速设定
    shoot_cmd_send.Blluet_speed_in  = BULLET_SPEED1  ; //射速 * （1m/s对应的角加速度） 
+  
+  #if SHOOT_Refeer_Enable  //赛场模式
    //裁判系统传入枪口热量数据
    shoot_cmd_send.shoot_heart_now_in = chassis_feedback_date.referee_shoot_heart_now ;
    shoot_cmd_send.shoot_heart_max_in = chassis_feedback_date.referee_shoot_heart_max ;
-
-
-
+  #else  //调试模式
+   shoot_cmd_send.shoot_heart_now_in = 0 ;
+   shoot_cmd_send.shoot_heart_max_in = 500 ;
+  #endif
 
    //chassis建立死区
    fs16data->L_LR = abs(fs16data->L_LR) < 50.0f ? 0.0f : fs16data->L_LR ;    //绝对值是否小于50 ，是取0 ，否取通道值本身

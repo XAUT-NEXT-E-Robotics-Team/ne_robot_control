@@ -197,13 +197,13 @@ void ChassisTask()
 	Slop_Plan_work( &Slop_Plan,chassis_vx ,chassis_vy ,0.1f);
 
 
-  // 根据控制模式进行正运动学解算,计算底盘输出
+  //根据控制模式进行正运动学解算,计算底盘输出
   MecanumCalculate();
 
-  // 根据裁判系统的反馈数据和电容数据对输出限幅并设定闭环参考值
+  //根据裁判系统的反馈数据和电容数据对输出限幅并设定闭环参考值
   LimitChassisOutput();
 
-  // 反馈数据给上板
+  //反馈数据给上板
   CANCommSend(chassis_can_comm,(void *)&chassis_feedback_date);
 
 }

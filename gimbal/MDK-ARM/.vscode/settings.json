@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "robot.h": "c",
+        "robot_task.h": "c"
+    }
+}

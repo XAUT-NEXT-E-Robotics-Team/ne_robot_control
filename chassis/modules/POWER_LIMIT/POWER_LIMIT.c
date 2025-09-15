@@ -1,24 +1,4 @@
 #include "POWER_LIMIT.h"
-#include "Slope_Plan.h"
-Powerlimit_e Powerlimit ;
-void Powerlimit_Init( Powerlimit_e * powerlimit)
-{
- powerlimit->T_coff = 1.99688994e-6f ; // (20/16384)*(0.3)*(187/3591)/9.55
- powerlimit->K2 = 1.453e-07 ;  // k1
- powerlimit->a = 1.23e-07 ;    // k2
-}
-
-   float chassis_total_power = 0;
-   float errorConfidence = 0.5; // 误差权重，误差越大，修正误差越快
-   float initial_total_power = 0;                      //4电机的总功率  
-   float spd_total_err = 0;                           //速度的差值总和
-   float initial_give_power  = 0;                     // initial power from PID calculation PID计算后的功率限制
-   float initial_total_power_last = 0;                 //4电机上一次的总功率
-   float scaled_give_power = 0;                        //功率衰减系数
-   float powerWeight_Prop = 0.0f;
-   float spd_err =0.0f;
-
-
 /**
  * @brief  西交利物浦大学+香港科技大学功率限制移植
  * @param  motor: 电机结构体
@@ -27,17 +7,19 @@ void Powerlimit_Init( Powerlimit_e * powerlimit)
 float powerlimit_LVP_HK_pro(DJIMotorInstance * motor , float power ) {
   uint16_t max_power_limit = power;                          // 裁判系统功率限制
   static float spd_total_err_last = 0;                       //速度上一次的差值总和
-  float constant = 4.081f;                                   //静态损耗
-//  static float chassis_total_power = 0;
-//  static float errorConfidence = 0.5; // 误差权重，误差越大，修正误差越快
-//  static float initial_total_power = 0;                      //4电机的总功率  
-//  static  float spd_total_err = 0;                           //速度的差值总和
-//  static  float initial_give_power  = 0;                     // initial power from PID calculation PID计算后的功率限制
-//  static float initial_total_power_last = 0;                 //4电机上一次的总功率
-//  static float scaled_give_power = 0;                        //功率衰减系数
-//  static float powerWeight_Prop = 0.0f;
-//  static float spd_err =0.0f;
-	
+  static float chassis_total_power = 0;
+  static float initial_total_power = 0;                      //4电机的总功率  
+  static  float initial_give_power  = 0;                     // initial power from PID calculation PID计算后的功率限制
+  static float initial_total_power_last = 0;                 //4电机上一次的总功率
+  static float scaled_give_power = 0;                        //可以给的功率
+  static float powerWeight_Prop = 0.0f;
+  static float spd_err =0.0f;	
+  static  float spd_total_err = 0;                           //速度的差值总和
+
+  static float errorConfidence = 0.5;                        //误差权重，误差越大，修正误差越快
+  float constant = 4.081f;                                   //静态损耗(需要测静态损耗)
+
+
   spd_err =  absf( motor->motor_controller.speed_PID.Ref/10.0f - motor->measure.speed_rpm ); // ->target - motor->realSpeedF
 
   float toque_coefficient = 1.99688994e-6f;  // (20/16384)*(0.3)*(187/3591)/9.55

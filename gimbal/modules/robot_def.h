@@ -22,8 +22,8 @@
  //执行PART
 #define LOADEMOTOR_JSB     180     //减速比（电机加拨盘设计[后者问问机械]）
 #define NUM_PER_CIRCLE     10      //拨盘一圈弹丸数量
-#define SHOOT_Speed_uint   5.34f   //1m/s线速度对应的W角加速度  
-#define LOADER_uint        36.0f * LOADEMOTOR_JSB   //拨一个弹丸需要转的角度(注意loader电机的减速比)
+#define SHOOT_Speed_uint   1910.0f   //1m/s线速度对应的W角加速度  ( 1/0.06 ) * 360.0
+#define LOADER_uint        36.0f    //拨一个弹丸需要转的角度(注意loader电机的减速比)
 #define LOADER_CHECK_Flag  LOADER_uint/2    //(LOADER_uint/2)
  //卡弹处理PART
 #define LOADER_STUCK_SPEED 360.0f    //电机速度1rpm    
@@ -32,7 +32,8 @@
  //热量限制PART
 #define SHOOT_PREQ_MAX     18       //射频最大值     
 #define SHOOT_HEAET_LIMIT  20.0f       //热量阈值，小于这个值直接进入等待 （计算 20 = 2 * 10即2发小弹丸）   
-
+ //shoot              
+#define SHOOT_Refeer_Enable  0
 
 //CHASSIS
 #define CENTER_GIMBAL_OFFSET_X 0.0f   //云台中心偏移x轴

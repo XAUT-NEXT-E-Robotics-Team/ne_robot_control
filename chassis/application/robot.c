@@ -18,7 +18,6 @@ void robot_init(void)
     //@todo:是否需要关闭所有中断
     //创建/启用任务，需在初始化之后
     RobotOSTaskCreate();
-
     LOGINFO("[robot] Robot Init Success");
 }
 

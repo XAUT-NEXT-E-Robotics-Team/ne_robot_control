@@ -39,9 +39,9 @@ void ShootInit()
    .controller_param_init_config = {
     .speed_PID = {
         .Kp = 3.0f ,
-        .Ki = 0.13f ,
-        .Kd = 0.002f ,
-        .IntegralLimit = 1000.0f ,
+        .Ki = 0.05f ,
+        .Kd = 0.0f ,
+        .IntegralLimit = .0f ,
         .MaxOut = 16000.0f ,
         .Improve = (PID_Improvement_e)(PID_Trapezoid_Intergral|PID_Integral_Limit|PID_Derivative_On_Measurement),
     },
@@ -55,10 +55,10 @@ void ShootInit()
    .motor_type = M3508 , //choose motor type
   };
  //seting friction_motor
-frictionmotor_config.can_init_config.tx_id = 1 ;
+frictionmotor_config.can_init_config.tx_id = 2 ;
 frileftmotor = DJIMotorInit(&frictionmotor_config);
 
-frictionmotor_config.can_init_config.tx_id = 2 ;
+frictionmotor_config.can_init_config.tx_id = 1 ;
 frictionmotor_config.controller_setting_init_config.motor_reverse_flag = MOTOR_DIRECTION_REVERSE ;  //反转
 frirightmotor = DJIMotorInit(&frictionmotor_config);  
   
@@ -73,27 +73,30 @@ frirightmotor = DJIMotorInit(&frictionmotor_config);
             .Kp = 10.0f ,
             .Ki = 0.000f ,
             .Kd = 0.0f ,
-            .IntegralLimit = 1000.0f ,
-            .MaxOut = 13000.0f ,
+            .IntegralLimit = 0.0f ,
+            .MaxOut = 16000.0f ,
             .Improve = (PID_Improvement_e)(PID_Trapezoid_Intergral|PID_Integral_Limit|PID_Derivative_On_Measurement),
         },
         .angle_PID = {
-            .Kp = 0.3f ,
+            .Kp = 1.0f ,
             .Ki = 0.00f ,
             .Kd = 0.0f ,
-            .IntegralLimit = 2000.0f ,
-            .MaxOut = 15000.0f ,
+            .IntegralLimit = 0.0f ,
+            .MaxOut = 5.0f ,
             .Improve = (PID_Improvement_e)(PID_Trapezoid_Intergral|PID_Integral_Limit|PID_Derivative_On_Measurement),
-        },      
+        },    
+			
     },
     .controller_setting_init_config = { //loadermotor use angle loop 
         .speed_feedback_source = MOTOR_FEED ,
         .angle_feedback_source = MOTOR_FEED ,
+			      
         .motor_reverse_flag = MOTOR_DIRECTION_NORMAL ,
         .outer_loop_type = ANGLE_LOOP ,
         .close_loop_type = (Closeloop_Type_e)(ANGLE_LOOP | SPEED_LOOP) } ,
-        
     .motor_type = M3508 };              //seting motor type
+	
+    loadermotor_config.controller_param_init_config.other_angle_feedback_ptr = &loadermotor->measure.angle_single_round ;
 
     loadermotor = DJIMotorInit(&loadermotor_config);    //seting loadermotor
 
@@ -101,9 +104,7 @@ frirightmotor = DJIMotorInit(&frictionmotor_config);
 shoot_sub = SubRegister("shoot_cmd",sizeof(Shoot_Ctrol_Cmd_s));
 //shoot_pub = PubRegister("shootfeedback",sizeof());   //shoot部分没有其他要传回来的了，可以直接在keil中查出对应的电机状态
 
-
-
-  //初始化发射机构逻辑结构体
+//初始化发射机构逻辑结构体
   shoot_logic_handle.loader_position = 0.0f ;
   shoot_logic_handle.shoot_count = 0 ;
   shoot_logic_handle.stuck_time_count = 0 ;
@@ -201,7 +202,7 @@ void ShootRun( Shoot_logic_handle_s *shoot )
 
     DJIMotorSetRef(frileftmotor,shoot->Bllute_Speed * SHOOT_Speed_uint );
     DJIMotorSetRef(frirightmotor,shoot->Bllute_Speed * SHOOT_Speed_uint);
-    DJIMotorSetRef(loadermotor , Loader_zero_handle( shoot->loader_position + LOADER_uint ) );      
+    DJIMotorSetRef(loadermotor , Loader_zero_handle(shoot->loader_position + LOADER_uint) );      
     shoot->shoot_state = shoot_set ;
     break;
   case PROCESS_STUCK :
@@ -211,7 +212,7 @@ void ShootRun( Shoot_logic_handle_s *shoot )
 
     DJIMotorSetRef(frileftmotor,shoot->Bllute_Speed * SHOOT_Speed_uint);
     DJIMotorSetRef(frirightmotor,shoot->Bllute_Speed * SHOOT_Speed_uint);
-    DJIMotorSetRef(loadermotor , Loader_zero_handle( shoot->loader_position - LOADER_uint ) ); 
+    DJIMotorSetRef(loadermotor , Loader_zero_handle( shoot->loader_position - LOADER_uint) ); 
     shoot->shoot_state = shoot_set ;
     break;
   default :
@@ -336,5 +337,6 @@ void ShootTask()
     //get cmd date
    SubGetMessage(shoot_sub,&shoot_cmd_recv);
 	  //外部控制参数传入
-   Shoot_control( &shoot_logic_handle ,  shoot_cmd_recv );
+   Shoot_control( &shoot_logic_handle , shoot_cmd_recv );
+   
 }
